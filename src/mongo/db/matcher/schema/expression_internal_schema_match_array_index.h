@@ -52,7 +52,7 @@ public:
      * Matches 'array' if the element at '_index' matches '_expression', or if its size is less than
      * '_index'.
      */
-    bool matchesArray(const BSONObj& array, MatchDetails* details) const final {
+    bool matchesArray(const BSONObj& array, ArrayPositionalMatch* details) const final {
         BSONElement element;
         auto iterator = BSONObjIterator(array);
 

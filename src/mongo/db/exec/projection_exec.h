@@ -110,7 +110,7 @@ private:
      */
     Status transform(const BSONObj& in,
                      BSONObjBuilder* bob,
-                     const MatchDetails* details = NULL) const;
+                     const ArrayPositionalMatch* details = NULL) const;
 
     /**
      * See transform(...) above.
@@ -125,7 +125,7 @@ private:
      */
     Status append(BSONObjBuilder* bob,
                   const BSONElement& elt,
-                  const MatchDetails* details = NULL,
+                  const ArrayPositionalMatch* details = NULL,
                   const ArrayOpType arrayOpType = ARRAY_OP_NORMAL) const;
 
     /**
@@ -166,7 +166,7 @@ private:
 
     ArrayOpType _arrayOpType;
 
-    // The full query expression.  Used when we need MatchDetails.
+    // The full query expression.  Used when we need ArrayPositionalMatch.
     const MatchExpression* _queryExpression;
 
     // Projections that aren't sourced from the document or index keys.

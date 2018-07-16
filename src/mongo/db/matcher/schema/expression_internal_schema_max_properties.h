@@ -44,13 +44,13 @@ public:
                                                      numProperties,
                                                      "$_internalSchemaMaxProperties") {}
 
-    bool matches(const MatchableDocument* doc, MatchDetails* details) const final {
+    bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details) const final {
         BSONObj obj = doc->toBSON();
         return (obj.nFields() <= numProperties());
     }
 
     bool matchesSingleElement(const BSONElement& elem,
-                              MatchDetails* details = nullptr) const final {
+                              ArrayPositionalMatch* details = nullptr) const final {
         if (elem.type() != BSONType::Object) {
             return false;
         }

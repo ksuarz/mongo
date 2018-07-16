@@ -120,22 +120,22 @@ TEST(ElemMatchObjectMatchExpression, ElemMatchKey) {
     BSONObj baseOperand = BSON("c" << 6);
     unique_ptr<ComparisonMatchExpression> eq(new EqualityMatchExpression("c", baseOperand["c"]));
     ElemMatchObjectMatchExpression op("a.b", eq.release());
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!op.matchesBSON(BSONObj(), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(!op.matchesBSON(BSON("a" << BSON("b" << BSON_ARRAY(BSON("c" << 7)))), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(op.matchesBSON(BSON("a" << BSON("b" << BSON_ARRAY(3 << BSON("c" << 6)))), &details));
-    ASSERT(details.hasElemMatchKey());
+    ASSERT(details.arrayPosition());
     // The entry within the $elemMatch array is reported.
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT_EQUALS("1", *details.arrayPosition());
     ASSERT(op.matchesBSON(
         BSON("a" << BSON_ARRAY(1 << 2 << BSON("b" << BSON_ARRAY(3 << 5 << BSON("c" << 6))))),
         &details));
-    ASSERT(details.hasElemMatchKey());
+    ASSERT(details.arrayPosition());
     // The entry within a parent of the $elemMatch array is reported.
-    ASSERT_EQUALS("2", details.elemMatchKey());
+    ASSERT_EQUALS("2", *details.arrayPosition());
 }
 
 TEST(ElemMatchObjectMatchExpression, Collation) {
@@ -228,21 +228,21 @@ TEST(ElemMatchValueMatchExpression, ElemMatchKey) {
     BSONObj baseOperand = BSON("$gt" << 6);
     unique_ptr<ComparisonMatchExpression> gt(new GTMatchExpression("", baseOperand["$gt"]));
     ElemMatchValueMatchExpression op("a.b", gt.release());
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!op.matchesBSON(BSONObj(), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(!op.matchesBSON(BSON("a" << BSON("b" << BSON_ARRAY(2))), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(op.matchesBSON(BSON("a" << BSON("b" << BSON_ARRAY(3 << 7))), &details));
-    ASSERT(details.hasElemMatchKey());
+    ASSERT(details.arrayPosition());
     // The entry within the $elemMatch array is reported.
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT_EQUALS("1", *details.arrayPosition());
     ASSERT(op.matchesBSON(BSON("a" << BSON_ARRAY(1 << 2 << BSON("b" << BSON_ARRAY(3 << 7)))),
                           &details));
-    ASSERT(details.hasElemMatchKey());
+    ASSERT(details.arrayPosition());
     // The entry within a parent of the $elemMatch array is reported.
-    ASSERT_EQUALS("2", details.elemMatchKey());
+    ASSERT_EQUALS("2", *details.arrayPosition());
 }
 
 /**
@@ -394,16 +394,16 @@ TEST(SizeMatchExpression, MatchesNestedArray) {
 
 TEST(SizeMatchExpression, ElemMatchKey) {
     SizeMatchExpression size("a.b", 3);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!size.matchesBSON(BSON("a" << 1), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(size.matchesBSON(BSON("a" << BSON("b" << BSON_ARRAY(1 << 2 << 3))), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(size.matchesBSON(BSON("a" << BSON_ARRAY(2 << BSON("b" << BSON_ARRAY(1 << 2 << 3)))),
                             &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(SizeMatchExpression, Equivalent) {

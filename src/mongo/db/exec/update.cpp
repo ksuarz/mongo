@@ -231,15 +231,16 @@ BSONObj UpdateStage::transformAndUpdate(const Snapshotted<BSONObj>& oldObj, Reco
             StringData(), &_doc, validateForStorage, immutablePaths, &logObj, &docWasModified);
     } else {
         // If there was a matched field, obtain it.
-        MatchDetails matchDetails;
-        matchDetails.requestElemMatchKey();
+        ArrayPositionalMatch matchDetails;
+        matchDetails.requestArrayPosition();
 
         dassert(cq);
         verify(cq->root()->matchesBSON(oldObj.value(), &matchDetails));
 
         string matchedField;
-        if (matchDetails.hasElemMatchKey())
-            matchedField = matchDetails.elemMatchKey();
+        if (matchDetails.arrayPosition()) {
+            matchedField = *matchDetails.arrayPosition();
+        }
 
         status = driver->update(
             matchedField, &_doc, validateForStorage, immutablePaths, &logObj, &docWasModified);

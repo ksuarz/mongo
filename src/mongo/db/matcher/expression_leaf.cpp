@@ -113,7 +113,7 @@ ComparisonMatchExpression::ComparisonMatchExpression(MatchType type,
 }
 
 bool ComparisonMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                     MatchDetails* details) const {
+                                                     ArrayPositionalMatch* details) const {
     if (e.canonicalType() != _rhs.canonicalType()) {
         // We can't call 'compareElements' on elements of different canonical types.  Usually
         // elements with different canonical types should never match any comparison, but there are
@@ -258,7 +258,8 @@ bool RegexMatchExpression::equivalent(const MatchExpression* other) const {
         _flags == realOther->_flags;
 }
 
-bool RegexMatchExpression::matchesSingleElement(const BSONElement& e, MatchDetails* details) const {
+bool RegexMatchExpression::matchesSingleElement(const BSONElement& e,
+                                                ArrayPositionalMatch* details) const {
     switch (e.type()) {
         case String:
         case Symbol: {
@@ -313,7 +314,8 @@ ModMatchExpression::ModMatchExpression(StringData path, int divisor, int remaind
     uassert(ErrorCodes::BadValue, "divisor cannot be 0", divisor != 0);
 }
 
-bool ModMatchExpression::matchesSingleElement(const BSONElement& e, MatchDetails* details) const {
+bool ModMatchExpression::matchesSingleElement(const BSONElement& e,
+                                              ArrayPositionalMatch* details) const {
     if (!e.isNumber())
         return false;
     return e.numberLong() % _divisor == _remainder;
@@ -349,7 +351,7 @@ bool ModMatchExpression::equivalent(const MatchExpression* other) const {
 ExistsMatchExpression::ExistsMatchExpression(StringData path) : LeafMatchExpression(EXISTS, path) {}
 
 bool ExistsMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                 MatchDetails* details) const {
+                                                 ArrayPositionalMatch* details) const {
     return !e.eoo();
 }
 
@@ -402,7 +404,8 @@ std::unique_ptr<MatchExpression> InMatchExpression::shallowClone() const {
     return std::move(next);
 }
 
-bool InMatchExpression::matchesSingleElement(const BSONElement& e, MatchDetails* details) const {
+bool InMatchExpression::matchesSingleElement(const BSONElement& e,
+                                             ArrayPositionalMatch* details) const {
     if (_hasNull && e.eoo()) {
         return true;
     }
@@ -691,7 +694,7 @@ bool BitTestMatchExpression::performBitTest(const char* eBinary, uint32_t eBinar
 }
 
 bool BitTestMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                  MatchDetails* details) const {
+                                                  ArrayPositionalMatch* details) const {
     // Validate 'e' is a number or a BinData.
     if (!e.isNumber() && e.type() != BSONType::BinData) {
         return false;

@@ -39,7 +39,8 @@ namespace mongo {
 WhereNoOpMatchExpression::WhereNoOpMatchExpression(WhereParams params)
     : WhereMatchExpressionBase(std::move(params)) {}
 
-bool WhereNoOpMatchExpression::matches(const MatchableDocument* doc, MatchDetails* details) const {
+bool WhereNoOpMatchExpression::matches(const MatchableDocument* doc,
+                                       ArrayPositionalMatch* details) const {
     MONGO_UNREACHABLE;
 }
 

@@ -260,7 +260,7 @@ Status ParsedProjection::make(OperationContext* opCtx,
 
     pp->_isInclusionProjection = (includeExclude == IncludeExclude::kInclude);
 
-    // The positional operator uses the MatchDetails from the query
+    // The positional operator uses the ArrayPositionalMatch from the query
     // expression to know which array element was matched.
     pp->_requiresMatchDetails = arrayOpType == ARRAY_OP_POSITIONAL;
 

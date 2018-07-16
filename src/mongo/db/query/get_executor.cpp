@@ -718,9 +718,9 @@ StatusWith<unique_ptr<PlanStage>> applyProjection(OperationContext* opCtx,
     }
     unique_ptr<ParsedProjection> pp(rawParsedProj);
 
-    // ProjectionExec requires the MatchDetails from the query expression when the projection
-    // uses the positional operator. Since the query may no longer match the newly-updated
-    // document, we forbid this case.
+    // ProjectionExec requires the ArrayPositionalMatch from the query expression when the
+    // projection uses the positional operator. Since the query may no longer match the
+    // newly-updated document, we forbid this case.
     if (!allowPositional && pp->requiresMatchDetails()) {
         return {ErrorCodes::BadValue,
                 "cannot use a positional projection and return the new document"};

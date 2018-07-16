@@ -44,11 +44,13 @@ public:
      */
     virtual StringData name() const = 0;
 
-    bool matches(const MatchableDocument* doc, MatchDetails* details = nullptr) const final {
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details = nullptr) const final {
         return _value;
     }
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final {
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final {
         return _value;
     }
 

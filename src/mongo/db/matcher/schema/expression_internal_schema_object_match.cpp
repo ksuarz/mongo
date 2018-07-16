@@ -42,8 +42,8 @@ InternalSchemaObjectMatchExpression::InternalSchemaObjectMatchExpression(
                           ElementPath::NonLeafArrayBehavior::kTraverse),
       _sub(std::move(expr)) {}
 
-bool InternalSchemaObjectMatchExpression::matchesSingleElement(const BSONElement& elem,
-                                                               MatchDetails* details) const {
+bool InternalSchemaObjectMatchExpression::matchesSingleElement(
+    const BSONElement& elem, ArrayPositionalMatch* details) const {
     if (elem.type() != BSONType::Object) {
         return false;
     }

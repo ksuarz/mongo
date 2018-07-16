@@ -29,6 +29,7 @@ env.CppUnitTest(
 env.Library(
     target='expressions',
     source=[
+        'array_positional_match.cpp',
         'expression.cpp',
         'expression_algo.cpp',
         'expression_array.cpp',
@@ -46,7 +47,6 @@ env.Library(
         'expression_with_placeholder.cpp',
         'extensions_callback.cpp',
         'extensions_callback_noop.cpp',
-        'match_details.cpp',
         'matchable.cpp',
         'matcher.cpp',
         'matcher_type_set.cpp',

@@ -40,7 +40,8 @@ ExprMatchExpression::ExprMatchExpression(BSONElement elem,
     : ExprMatchExpression(Expression::parseOperand(expCtx, elem, expCtx->variablesParseState),
                           expCtx) {}
 
-bool ExprMatchExpression::matches(const MatchableDocument* doc, MatchDetails* details) const {
+bool ExprMatchExpression::matches(const MatchableDocument* doc,
+                                  ArrayPositionalMatch* details) const {
     if (_rewriteResult && _rewriteResult->matchExpression() &&
         !_rewriteResult->matchExpression()->matches(doc, details)) {
         return false;

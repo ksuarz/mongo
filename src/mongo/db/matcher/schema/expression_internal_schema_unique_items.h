@@ -60,7 +60,7 @@ public:
         return nullptr;
     }
 
-    bool matchesArray(const BSONObj& array, MatchDetails*) const final {
+    bool matchesArray(const BSONObj& array, ArrayPositionalMatch*) const final {
         auto set = _comparator.makeBSONEltSet();
         for (auto&& elem : array) {
             if (!std::get<bool>(set.insert(elem))) {

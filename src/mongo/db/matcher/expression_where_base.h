@@ -56,7 +56,8 @@ public:
         return nullptr;
     }
 
-    bool matchesSingleElement(const BSONElement& e, MatchDetails* details = nullptr) const final {
+    bool matchesSingleElement(const BSONElement& e,
+                              ArrayPositionalMatch* details = nullptr) const final {
         return false;
     }
 

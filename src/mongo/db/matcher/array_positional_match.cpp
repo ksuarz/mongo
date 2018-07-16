@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 MongoDB Inc.
+ * Copyright (C) 2018 MongoDB Inc.
  *
  * This program is free software: you can redistribute it and/or  modify
  * it under the terms of the GNU Affero General Public License, version 3,
@@ -28,41 +28,22 @@
 
 #include "mongo/platform/basic.h"
 
-#include "mongo/db/matcher/expression_internal_expr_eq.h"
+#include "mongo/db/matcher/array_positional_match.h"
 
-#include "mongo/bson/bsonobj.h"
-#include "mongo/bson/bsonobjbuilder.h"
+#include "mongo/base/string_data.h"
 
 namespace mongo {
-
-constexpr StringData InternalExprEqMatchExpression::kName;
-
-bool InternalExprEqMatchExpression::matchesSingleElement(const BSONElement& elem,
-                                                         ArrayPositionalMatch* details) const {
-    // We use NonLeafArrayBehavior::kMatchSubpath traversal in InternalExprEqMatchExpression. This
-    // means matchesSinglElement() will be called when an array is found anywhere along the patch we
-    // are matching against. When this occurs, we return 'true' and depend on the corresponding
-    // ExprMatchExpression node to filter properly.
-    if (elem.type() == BSONType::Array) {
-        return true;
-    }
-
-    if (elem.canonicalType() != _rhs.canonicalType()) {
-        return false;
-    }
-
-    auto comp = BSONElement::compareElements(
-        elem, _rhs, BSONElement::ComparisonRules::kConsiderFieldName, _collator);
-    return comp == 0;
+void ArrayPositionalMatch::reset() {
+    _arrayPosition = boost::none;
 }
 
-std::unique_ptr<MatchExpression> InternalExprEqMatchExpression::shallowClone() const {
-    auto clone = stdx::make_unique<InternalExprEqMatchExpression>(path(), _rhs);
-    clone->setCollator(_collator);
-    if (getTag()) {
-        clone->setTag(getTag()->clone());
-    }
-    return std::move(clone);
+void ArrayPositionalMatch::requestArrayPosition() {
+    _arrayPositionRequested = true;
 }
 
-}  //  namespace mongo
+void ArrayPositionalMatch::setArrayPosition(StringData pos) {
+    if (_arrayPositionRequested) {
+        _arrayPosition = pos.toString();
+    }
+}
+}  // namespace mongo

@@ -36,7 +36,7 @@
 namespace mongo {
 
 bool ArrayMatchingMatchExpression::matchesSingleElement(const BSONElement& elt,
-                                                        MatchDetails* details) const {
+                                                        ArrayPositionalMatch* details) const {
     if (elt.type() != BSONType::Array) {
         return false;
     }
@@ -72,15 +72,15 @@ ElemMatchObjectMatchExpression::ElemMatchObjectMatchExpression(StringData path,
     : ArrayMatchingMatchExpression(ELEM_MATCH_OBJECT, path), _sub(sub) {}
 
 bool ElemMatchObjectMatchExpression::matchesArray(const BSONObj& anArray,
-                                                  MatchDetails* details) const {
+                                                  ArrayPositionalMatch* details) const {
     BSONObjIterator i(anArray);
     while (i.more()) {
         BSONElement inner = i.next();
         if (!inner.isABSONObj())
             continue;
         if (_sub->matchesBSON(inner.Obj(), NULL)) {
-            if (details && details->needRecord()) {
-                details->setElemMatchKey(inner.fieldName());
+            if (details && details->arrayPositionRequested()) {
+                details->setArrayPosition(inner.fieldNameStringData());
             }
             return true;
         }
@@ -138,14 +138,14 @@ void ElemMatchValueMatchExpression::add(MatchExpression* sub) {
 }
 
 bool ElemMatchValueMatchExpression::matchesArray(const BSONObj& anArray,
-                                                 MatchDetails* details) const {
+                                                 ArrayPositionalMatch* details) const {
     BSONObjIterator i(anArray);
     while (i.more()) {
         BSONElement inner = i.next();
 
         if (_arrayElementMatchesAll(inner)) {
-            if (details && details->needRecord()) {
-                details->setElemMatchKey(inner.fieldName());
+            if (details && details->arrayPositionRequested()) {
+                details->setArrayPosition(inner.fieldNameStringData());
             }
             return true;
         }
@@ -207,7 +207,8 @@ MatchExpression::ExpressionOptimizerFunc ElemMatchValueMatchExpression::getOptim
 SizeMatchExpression::SizeMatchExpression(StringData path, int size)
     : ArrayMatchingMatchExpression(SIZE, path), _size(size) {}
 
-bool SizeMatchExpression::matchesArray(const BSONObj& anArray, MatchDetails* details) const {
+bool SizeMatchExpression::matchesArray(const BSONObj& anArray,
+                                       ArrayPositionalMatch* details) const {
     if (_size < 0)
         return false;
     return anArray.nFields() == _size;

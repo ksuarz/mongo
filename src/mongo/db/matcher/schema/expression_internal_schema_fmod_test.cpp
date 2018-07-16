@@ -87,15 +87,15 @@ TEST(InternalSchemaFmodMatchExpression, NegativeRemainders) {
 
 TEST(InternalSchemaFmodMatchExpression, ElemMatchKey) {
     InternalSchemaFmodMatchExpression fmod("a", Decimal128(5), Decimal128(2));
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT_FALSE(fmod.matchesBSON(BSON("a" << 4), &details));
-    ASSERT_FALSE(details.hasElemMatchKey());
+    ASSERT_FALSE(details.arrayPosition());
     ASSERT_TRUE(fmod.matchesBSON(BSON("a" << 2), &details));
-    ASSERT_FALSE(details.hasElemMatchKey());
+    ASSERT_FALSE(details.arrayPosition());
     ASSERT_TRUE(fmod.matchesBSON(BSON("a" << BSON_ARRAY(1 << 2 << 5)), &details));
-    ASSERT_TRUE(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT_TRUE(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(InternalSchemaFmodMatchExpression, Equality) {

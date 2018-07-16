@@ -88,12 +88,12 @@ bool InternalSchemaAllowedPropertiesMatchExpression::equivalent(const MatchExpre
 }
 
 bool InternalSchemaAllowedPropertiesMatchExpression::matches(const MatchableDocument* doc,
-                                                             MatchDetails* details) const {
+                                                             ArrayPositionalMatch* details) const {
     return _matchesBSONObj(doc->toBSON());
 }
 
-bool InternalSchemaAllowedPropertiesMatchExpression::matchesSingleElement(const BSONElement& elem,
-                                                                          MatchDetails*) const {
+bool InternalSchemaAllowedPropertiesMatchExpression::matchesSingleElement(
+    const BSONElement& elem, ArrayPositionalMatch*) const {
     if (elem.type() != BSONType::Object) {
         return false;
     }

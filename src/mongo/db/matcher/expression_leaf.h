@@ -166,7 +166,8 @@ public:
 
     virtual ~ComparisonMatchExpression() = default;
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 };
 
 class EqualityMatchExpression final : public ComparisonMatchExpression {
@@ -300,7 +301,8 @@ public:
         return std::move(e);
     }
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 
@@ -344,7 +346,8 @@ public:
         return std::move(m);
     }
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 
@@ -380,7 +383,8 @@ public:
         return std::move(e);
     }
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 
@@ -403,7 +407,8 @@ public:
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const;
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 
@@ -492,7 +497,8 @@ public:
                                     uint32_t bitMaskLen);
     virtual ~BitTestMatchExpression() {}
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 

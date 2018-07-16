@@ -49,7 +49,8 @@ public:
         return std::move(m);
     }
 
-    bool matchesSingleElement(const BSONElement& e, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement& e,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     void debugString(StringBuilder& debug, int level) const final;
 

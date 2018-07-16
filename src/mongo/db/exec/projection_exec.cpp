@@ -266,11 +266,11 @@ Status ProjectionExec::transform(WorkingSetMember* member) const {
 
     BSONObjBuilder bob;
     if (member->hasObj()) {
-        MatchDetails matchDetails;
+        ArrayPositionalMatch matchDetails;
 
-        // If it's a positional projection we need a MatchDetails.
+        // If it's a positional projection we need a ArrayPositionalMatch.
         if (transformRequiresDetails()) {
-            matchDetails.requestElemMatchKey();
+            matchDetails.requestArrayPosition();
             verify(NULL != _queryExpression);
             verify(_queryExpression->matchesBSON(member->obj.value(), &matchDetails));
         }
@@ -378,7 +378,7 @@ Status ProjectionExec::transform(WorkingSetMember* member) const {
 
 Status ProjectionExec::transform(const BSONObj& in,
                                  BSONObjBuilder* bob,
-                                 const MatchDetails* details) const {
+                                 const ArrayPositionalMatch* details) const {
     const ArrayOpType& arrayOpType = _arrayOpType;
 
     BSONObjIterator it(in);
@@ -408,8 +408,8 @@ Status ProjectionExec::transform(const BSONObj& in,
             return Status(ErrorCodes::BadValue, "Matchers are only supported for $elemMatch");
         }
 
-        MatchDetails arrayDetails;
-        arrayDetails.requestElemMatchKey();
+        ArrayPositionalMatch arrayDetails;
+        arrayDetails.requestArrayPosition();
 
         if (matcher->second->matchesBSON(in, &arrayDetails)) {
             FieldMap::const_iterator fieldIt = _fields.find(elt.fieldName());
@@ -426,13 +426,14 @@ Status ProjectionExec::transform(const BSONObj& in,
                               "$elemMatch called on document element with eoo");
             }
 
-            if (in.getField(elt.fieldName()).Obj().getField(arrayDetails.elemMatchKey()).eoo()) {
+            invariant(arrayDetails.arrayPosition());
+            const auto& pos = *arrayDetails.arrayPosition();
+            if (in.getField(elt.fieldName()).Obj().getField(pos).eoo()) {
                 return Status(ErrorCodes::InternalError,
                               "$elemMatch called on array element with eoo");
             }
 
-            arrBuilder.append(
-                in.getField(elt.fieldName()).Obj().getField(arrayDetails.elemMatchKey()));
+            arrBuilder.append(in.getField(elt.fieldName()).Obj().getField(pos));
             subBob.appendArray(matcher->first, arrBuilder.arr());
             Status status = append(bob, subBob.done().firstElement(), details, arrayOpType);
             if (!status.isOK()) {
@@ -492,7 +493,7 @@ void ProjectionExec::appendArray(BSONObjBuilder* bob, const BSONObj& array, bool
 
 Status ProjectionExec::append(BSONObjBuilder* bob,
                               const BSONElement& elt,
-                              const MatchDetails* details,
+                              const ArrayPositionalMatch* details,
                               const ArrayOpType arrayOpType) const {
     // Skip if the field name matches a computed $meta field.
     // $meta projection fields can exist at the top level of
@@ -528,7 +529,7 @@ Status ProjectionExec::append(BSONObjBuilder* bob,
         BSONObjBuilder matchedBuilder;
         if (details && arrayOpType == ARRAY_OP_POSITIONAL) {
             // $ positional operator specified
-            if (!details->hasElemMatchKey()) {
+            if (!details->arrayPosition()) {
                 mongoutils::str::stream error;
                 error << "positional operator (" << elt.fieldName()
                       << ".$) requires corresponding field"
@@ -536,12 +537,13 @@ Status ProjectionExec::append(BSONObjBuilder* bob,
                 return Status(ErrorCodes::BadValue, error);
             }
 
-            if (elt.embeddedObject()[details->elemMatchKey()].eoo()) {
+            const auto& pos = *details->arrayPosition();
+            if (elt.embeddedObject()[pos].eoo()) {
                 return Status(ErrorCodes::BadValue, "positional operator element mismatch");
             }
 
             // append as the first and only element in the projected array
-            matchedBuilder.appendAs(elt.embeddedObject()[details->elemMatchKey()], "0");
+            matchedBuilder.appendAs(elt.embeddedObject()[pos], "0");
         } else {
             // append exact array; no subarray matcher specified
             subfm.appendArray(&matchedBuilder, elt.embeddedObject());

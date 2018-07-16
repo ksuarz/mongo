@@ -55,7 +55,7 @@ Matcher::Matcher(const BSONObj& pattern,
     _expression = std::move(statusWithMatcher.getValue());
 }
 
-bool Matcher::matches(const BSONObj& doc, MatchDetails* details) const {
+bool Matcher::matches(const BSONObj& doc, ArrayPositionalMatch* details) const {
     if (!_expression)
         return true;
 

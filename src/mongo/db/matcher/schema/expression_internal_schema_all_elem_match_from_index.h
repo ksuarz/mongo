@@ -47,7 +47,7 @@ public:
 
     std::unique_ptr<MatchExpression> shallowClone() const final;
 
-    bool matchesArray(const BSONObj& array, MatchDetails* details) const final {
+    bool matchesArray(const BSONObj& array, ArrayPositionalMatch* details) const final {
         auto iter = BSONObjIterator(array);
         for (int i = 0; iter.more() && i < _index; i++) {
             iter.next();

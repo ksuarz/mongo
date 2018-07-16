@@ -48,7 +48,7 @@ InternalSchemaEqMatchExpression::InternalSchemaEqMatchExpression(StringData path
 }
 
 bool InternalSchemaEqMatchExpression::matchesSingleElement(const BSONElement& elem,
-                                                           MatchDetails* details) const {
+                                                           ArrayPositionalMatch* details) const {
     return _eltCmp.evaluate(_rhsElem == elem);
 }
 

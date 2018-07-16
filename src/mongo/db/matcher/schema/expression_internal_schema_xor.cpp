@@ -38,7 +38,7 @@ namespace mongo {
 constexpr StringData InternalSchemaXorMatchExpression::kName;
 
 bool InternalSchemaXorMatchExpression::matches(const MatchableDocument* doc,
-                                               MatchDetails* details) const {
+                                               ArrayPositionalMatch* details) const {
     bool found = false;
     for (size_t i = 0; i < numChildren(); i++) {
         if (getChild(i)->matches(doc, nullptr)) {
@@ -52,7 +52,7 @@ bool InternalSchemaXorMatchExpression::matches(const MatchableDocument* doc,
 }
 
 bool InternalSchemaXorMatchExpression::matchesSingleElement(const BSONElement& element,
-                                                            MatchDetails* details) const {
+                                                            ArrayPositionalMatch* details) const {
     bool found = false;
     for (size_t i = 0; i < numChildren(); i++) {
         if (getChild(i)->matchesSingleElement(element, details)) {

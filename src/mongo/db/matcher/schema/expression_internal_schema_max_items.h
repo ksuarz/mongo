@@ -43,7 +43,7 @@ public:
         : InternalSchemaNumArrayItemsMatchExpression(
               INTERNAL_SCHEMA_MAX_ITEMS, path, numItems, "$_internalSchemaMaxItems"_sd) {}
 
-    bool matchesArray(const BSONObj& anArray, MatchDetails* details) const final {
+    bool matchesArray(const BSONObj& anArray, ArrayPositionalMatch* details) const final {
         return (anArray.nFields() <= numItems());
     }
 

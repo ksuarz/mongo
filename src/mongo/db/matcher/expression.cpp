@@ -56,12 +56,12 @@ void MatchExpression::_debugAddSpace(StringBuilder& debug, int level) const {
         debug << "    ";
 }
 
-bool MatchExpression::matchesBSON(const BSONObj& doc, MatchDetails* details) const {
+bool MatchExpression::matchesBSON(const BSONObj& doc, ArrayPositionalMatch* details) const {
     BSONMatchableDocument mydoc(doc);
     return matches(&mydoc, details);
 }
 
-bool MatchExpression::matchesBSONElement(BSONElement elem, MatchDetails* details) const {
+bool MatchExpression::matchesBSONElement(BSONElement elem, ArrayPositionalMatch* details) const {
     BSONElementViewMatchableDocument matchableDoc(elem);
     return matches(&matchableDoc, details);
 }

@@ -60,7 +60,7 @@ public:
     }
 
     bool matchesSingleElement(const BSONElement& elem,
-                              MatchDetails* details = nullptr) const final {
+                              ArrayPositionalMatch* details = nullptr) const final {
         return _typeSet.hasType(elem.type());
     }
 

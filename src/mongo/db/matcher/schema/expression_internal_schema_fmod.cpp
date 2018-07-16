@@ -48,7 +48,7 @@ InternalSchemaFmodMatchExpression::InternalSchemaFmodMatchExpression(StringData 
 }
 
 bool InternalSchemaFmodMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                             MatchDetails* details) const {
+                                                             ArrayPositionalMatch* details) const {
     if (!e.isNumber()) {
         return false;
     }

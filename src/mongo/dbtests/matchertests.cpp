@@ -203,20 +203,20 @@ public:
     }
 };
 
-/** Test that MatchDetails::elemMatchKey() is set correctly after a match. */
+/** Test that ArrayPositionalMatch::arrayPosition() is set correctly after a match. */
 template <typename M>
 class ElemMatchKey {
 public:
     void run() {
         boost::intrusive_ptr<ExpressionContextForTest> expCtx(new ExpressionContextForTest());
         M matcher(BSON("a.b" << 1), expCtx);
-        MatchDetails details;
-        details.requestElemMatchKey();
-        ASSERT(!details.hasElemMatchKey());
+        ArrayPositionalMatch details;
+        details.requestArrayPosition();
+        ASSERT(!details.arrayPosition());
         ASSERT(matcher.matches(fromjson("{ a:[ { b:1 } ] }"), &details));
         // The '0' entry of the 'a' array is matched.
-        ASSERT(details.hasElemMatchKey());
-        ASSERT_EQUALS(string("0"), details.elemMatchKey());
+        ASSERT(details.arrayPosition());
+        ASSERT_EQUALS(string("0"), *details.arrayPosition());
     }
 };
 

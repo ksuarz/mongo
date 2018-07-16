@@ -83,17 +83,17 @@ TEST(InternalSchemaXorOp, DoesNotUseElemMatchKey) {
     BSONObj matchPredicate = fromjson("{$_internalSchemaXor: [{a: 1}, {b: 2}]}");
 
     auto expr = MatchExpressionParser::parse(matchPredicate, expCtx);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT_OK(expr.getStatus());
     ASSERT_TRUE(expr.getValue()->matchesBSON(BSON("a" << 1), &details));
-    ASSERT_FALSE(details.hasElemMatchKey());
+    ASSERT_FALSE(details.arrayPosition());
     ASSERT_TRUE(expr.getValue()->matchesBSON(BSON("a" << BSON_ARRAY(1) << "b" << BSON_ARRAY(10)),
                                              &details));
-    ASSERT_FALSE(details.hasElemMatchKey());
+    ASSERT_FALSE(details.arrayPosition());
     ASSERT_FALSE(
         expr.getValue()->matchesBSON(BSON("a" << BSON_ARRAY(3) << "b" << BSON_ARRAY(4)), &details));
-    ASSERT_FALSE(details.hasElemMatchKey());
+    ASSERT_FALSE(details.arrayPosition());
 }
 
 TEST(InternalSchemaXorOp, Equivalent) {

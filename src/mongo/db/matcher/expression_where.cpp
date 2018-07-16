@@ -70,7 +70,8 @@ WhereMatchExpression::WhereMatchExpression(OperationContext* opCtx,
     uassert(ErrorCodes::BadValue, "$where compile error", _func);
 }
 
-bool WhereMatchExpression::matches(const MatchableDocument* doc, MatchDetails* details) const {
+bool WhereMatchExpression::matches(const MatchableDocument* doc,
+                                   ArrayPositionalMatch* details) const {
     uassert(28692, "$where compile error", _func);
     BSONObj obj = doc->toBSON();
 

@@ -53,15 +53,16 @@ public:
 
     virtual ~PathMatchExpression() {}
 
-    bool matches(const MatchableDocument* doc, MatchDetails* details = nullptr) const final {
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details = nullptr) const final {
         MatchableDocument::IteratorHolder cursor(doc, &_elementPath);
         while (cursor->more()) {
             ElementIterator::Context e = cursor->next();
             if (!matchesSingleElement(e.element(), details)) {
                 continue;
             }
-            if (details && details->needRecord() && !e.arrayOffset().eoo()) {
-                details->setElemMatchKey(e.arrayOffset().fieldName());
+            if (details && details->arrayPositionRequested() && !e.arrayOffset().eoo()) {
+                details->setArrayPosition(e.arrayOffset().fieldNameStringData());
             }
             return true;
         }

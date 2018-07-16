@@ -193,18 +193,20 @@ bool ListOfMatchExpression::equivalent(const MatchExpression* other) const {
 
 // -----
 
-bool AndMatchExpression::matches(const MatchableDocument* doc, MatchDetails* details) const {
+bool AndMatchExpression::matches(const MatchableDocument* doc,
+                                 ArrayPositionalMatch* details) const {
     for (size_t i = 0; i < numChildren(); i++) {
         if (!getChild(i)->matches(doc, details)) {
             if (details)
-                details->resetOutput();
+                details->reset();
             return false;
         }
     }
     return true;
 }
 
-bool AndMatchExpression::matchesSingleElement(const BSONElement& e, MatchDetails* details) const {
+bool AndMatchExpression::matchesSingleElement(const BSONElement& e,
+                                              ArrayPositionalMatch* details) const {
     for (size_t i = 0; i < numChildren(); i++) {
         if (!getChild(i)->matchesSingleElement(e, details)) {
             return false;
@@ -238,16 +240,20 @@ bool AndMatchExpression::isTriviallyTrue() const {
 
 // -----
 
-bool OrMatchExpression::matches(const MatchableDocument* doc, MatchDetails* details) const {
+bool OrMatchExpression::matches(const MatchableDocument* doc, ArrayPositionalMatch*) const {
     for (size_t i = 0; i < numChildren(); i++) {
-        if (getChild(i)->matches(doc, NULL)) {
+        // We purposefully do not set the ArrayPositionalMatch. Users can use the array filters
+        // feature to find the array position of a non-matching element.
+        constexpr auto positionalMatch = nullptr;
+        if (getChild(i)->matches(doc, positionalMatch)) {
             return true;
         }
     }
     return false;
 }
 
-bool OrMatchExpression::matchesSingleElement(const BSONElement& e, MatchDetails* details) const {
+bool OrMatchExpression::matchesSingleElement(const BSONElement& e,
+                                             ArrayPositionalMatch* details) const {
     for (size_t i = 0; i < numChildren(); i++) {
         if (getChild(i)->matchesSingleElement(e, details)) {
             return true;
@@ -281,16 +287,21 @@ bool OrMatchExpression::isTriviallyFalse() const {
 
 // ----
 
-bool NorMatchExpression::matches(const MatchableDocument* doc, MatchDetails* details) const {
+bool NorMatchExpression::matches(const MatchableDocument* doc,
+                                 ArrayPositionalMatch* details) const {
     for (size_t i = 0; i < numChildren(); i++) {
-        if (getChild(i)->matches(doc, NULL)) {
+        // We purposefully do not set the ArrayPositionalMatch for negative match expressions. Users
+        // can use the array filters feature to find the array position of a non-matching element.
+        constexpr auto positionalMatch = nullptr;
+        if (getChild(i)->matches(doc, positionalMatch)) {
             return false;
         }
     }
     return true;
 }
 
-bool NorMatchExpression::matchesSingleElement(const BSONElement& e, MatchDetails* details) const {
+bool NorMatchExpression::matchesSingleElement(const BSONElement& e,
+                                              ArrayPositionalMatch* details) const {
     for (size_t i = 0; i < numChildren(); i++) {
         if (getChild(i)->matchesSingleElement(e, details)) {
             return false;

@@ -85,7 +85,8 @@ public:
 
     virtual ~GeoMatchExpression() {}
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level = 0) const;
 
@@ -176,7 +177,8 @@ public:
      * Stub implementation that should never be called, since geoNear execution requires an
      * appropriate geo index.
      */
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level = 0) const;
 

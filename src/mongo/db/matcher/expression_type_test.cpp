@@ -136,21 +136,21 @@ TEST(ExpressionTypeTest, MatchesNull) {
 
 TEST(ExpressionTypeTest, ElemMatchKey) {
     TypeMatchExpression type("a.b", String);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!type.matchesBSON(BSON("a" << 1), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(type.matchesBSON(BSON("a" << BSON("b"
                                              << "string")),
                             &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(type.matchesBSON(BSON("a" << BSON("b" << BSON_ARRAY("string"))), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("0", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("0", *details.arrayPosition());
     ASSERT(type.matchesBSON(BSON("a" << BSON_ARRAY(2 << BSON("b" << BSON_ARRAY("string")))),
                             &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(ExpressionTypeTest, Equivalent) {

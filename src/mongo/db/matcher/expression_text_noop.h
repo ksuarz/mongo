@@ -41,7 +41,8 @@ public:
         return _ftsQuery;
     }
 
-    bool matchesSingleElement(const BSONElement& e, MatchDetails* details = nullptr) const final {
+    bool matchesSingleElement(const BSONElement& e,
+                              ArrayPositionalMatch* details = nullptr) const final {
         MONGO_UNREACHABLE;
     }
 

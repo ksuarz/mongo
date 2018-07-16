@@ -35,7 +35,7 @@
 #include "mongo/base/status.h"
 #include "mongo/bson/bsonobj.h"
 #include "mongo/bson/bsonobjbuilder.h"
-#include "mongo/db/matcher/match_details.h"
+#include "mongo/db/matcher/array_positional_match.h"
 #include "mongo/db/matcher/matchable.h"
 #include "mongo/db/pipeline/dependencies.h"
 #include "mongo/stdx/functional.h"
@@ -213,13 +213,17 @@ public:
     // XXX document
     virtual bool equivalent(const MatchExpression* other) const = 0;
 
-    //
-    // Determine if a document satisfies the tree-predicate.
-    //
+    /**
+     * Returns true if 'doc' satisfies the query predicate. If 'details' is set, it is filled with
+     * the array offset of the match if requested.
+     */
+    virtual bool matches(const MatchableDocument* doc,
+                         ArrayPositionalMatch* details = nullptr) const = 0;
 
-    virtual bool matches(const MatchableDocument* doc, MatchDetails* details = nullptr) const = 0;
-
-    virtual bool matchesBSON(const BSONObj& doc, MatchDetails* details = nullptr) const;
+    /**
+     * Returns true if the BSONObj satisfies the query predicate.
+     */
+    virtual bool matchesBSON(const BSONObj& doc, ArrayPositionalMatch* details = nullptr) const;
 
     /**
      * Determines if 'elem' would satisfy the predicate if wrapped with the top-level field name of
@@ -228,14 +232,15 @@ public:
      * obj["a"]["0"] because it performs the match as if the element at "a.0" were the BSONObj {i:
      * 5}.
      */
-    virtual bool matchesBSONElement(BSONElement elem, MatchDetails* details = nullptr) const;
+    virtual bool matchesBSONElement(BSONElement elem,
+                                    ArrayPositionalMatch* details = nullptr) const;
 
     /**
      * Determines if the element satisfies the tree-predicate.
      * Not valid for all expressions (e.g. $where); in those cases, returns false.
      */
     virtual bool matchesSingleElement(const BSONElement& e,
-                                      MatchDetails* details = nullptr) const = 0;
+                                      ArrayPositionalMatch* details = nullptr) const = 0;
 
     //
     // Tagging mechanism: Hang data off of the tree for retrieval later.

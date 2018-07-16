@@ -63,15 +63,15 @@ TEST(NotMatchExpression, ElemMatchKey) {
     BSONObj baseOperand = BSON("$lt" << 5);
     unique_ptr<ComparisonMatchExpression> lt(new LTMatchExpression("a", baseOperand["$lt"]));
     NotMatchExpression notOp(lt.release());
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!notOp.matchesBSON(BSON("a" << BSON_ARRAY(1)), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(notOp.matchesBSON(BSON("a" << 6), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(notOp.matchesBSON(BSON("a" << BSON_ARRAY(6)), &details));
-    // elemMatchKey is not implemented for negative match operators.
-    ASSERT(!details.hasElemMatchKey());
+    // arrayPosition is not implemented for negative match operators.
+    ASSERT(!details.arrayPosition());
 }
 
 TEST(NotMatchExpression, SetCollatorPropagatesToChild) {
@@ -166,16 +166,16 @@ TEST(AndOp, ElemMatchKey) {
     andOp.add(sub1.release());
     andOp.add(sub2.release());
 
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!andOp.matchesBSON(BSON("a" << BSON_ARRAY(1)), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(!andOp.matchesBSON(BSON("b" << BSON_ARRAY(2)), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(andOp.matchesBSON(BSON("a" << BSON_ARRAY(1) << "b" << BSON_ARRAY(1 << 2)), &details));
-    ASSERT(details.hasElemMatchKey());
+    ASSERT(details.arrayPosition());
     // The elem match key for the second $and clause is recorded.
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(OrOp, NoClauses) {
@@ -229,15 +229,15 @@ TEST(OrOp, ElemMatchKey) {
     orOp.add(sub1.release());
     orOp.add(sub2.release());
 
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!orOp.matchesBSON(BSONObj(), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(!orOp.matchesBSON(BSON("a" << BSON_ARRAY(10) << "b" << BSON_ARRAY(10)), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(orOp.matchesBSON(BSON("a" << BSON_ARRAY(1) << "b" << BSON_ARRAY(1 << 2)), &details));
     // The elem match key feature is not implemented for $or.
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
 }
 
 TEST(NorOp, NoClauses) {
@@ -292,15 +292,15 @@ TEST(NorOp, ElemMatchKey) {
     norOp.add(sub1.release());
     norOp.add(sub2.release());
 
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!norOp.matchesBSON(BSON("a" << 1), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(!norOp.matchesBSON(BSON("a" << BSON_ARRAY(1) << "b" << BSON_ARRAY(10)), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(norOp.matchesBSON(BSON("a" << BSON_ARRAY(3) << "b" << BSON_ARRAY(4)), &details));
     // The elem match key feature is not implemented for $nor.
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
 }
 
 

@@ -111,9 +111,10 @@ public:
     AndMatchExpression() : ListOfMatchExpression(AND) {}
     virtual ~AndMatchExpression() {}
 
-    virtual bool matches(const MatchableDocument* doc, MatchDetails* details = 0) const;
+    virtual bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details = 0) const;
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         std::unique_ptr<AndMatchExpression> self = stdx::make_unique<AndMatchExpression>();
@@ -140,9 +141,10 @@ public:
     OrMatchExpression() : ListOfMatchExpression(OR) {}
     virtual ~OrMatchExpression() {}
 
-    virtual bool matches(const MatchableDocument* doc, MatchDetails* details = 0) const;
+    virtual bool matches(const MatchableDocument* doc, ArrayPositionalMatch* = nullptr) const;
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         std::unique_ptr<OrMatchExpression> self = stdx::make_unique<OrMatchExpression>();
@@ -169,9 +171,10 @@ public:
     NorMatchExpression() : ListOfMatchExpression(NOR) {}
     virtual ~NorMatchExpression() {}
 
-    virtual bool matches(const MatchableDocument* doc, MatchDetails* details = 0) const;
+    virtual bool matches(const MatchableDocument* doc, ArrayPositionalMatch* = nullptr) const;
 
-    bool matchesSingleElement(const BSONElement&, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         std::unique_ptr<NorMatchExpression> self = stdx::make_unique<NorMatchExpression>();
@@ -202,11 +205,14 @@ public:
         return std::move(self);
     }
 
-    virtual bool matches(const MatchableDocument* doc, MatchDetails* details = 0) const {
-        return !_exp->matches(doc, NULL);
+    virtual bool matches(const MatchableDocument* doc, ArrayPositionalMatch* = nullptr) const {
+        // We purposefully do not set the ArrayPositionalMatch for negative match expressions. Users
+        // can use the array filters feature to find the array position of a non-matching element.
+        constexpr auto positionalMatch = nullptr;
+        return !_exp->matches(doc, positionalMatch);
     }
 
-    bool matchesSingleElement(const BSONElement& elt, MatchDetails* details = nullptr) const final {
+    bool matchesSingleElement(const BSONElement& elt, ArrayPositionalMatch* details = nullptr) const final {
         return !_exp->matchesSingleElement(elt, details);
     }
 

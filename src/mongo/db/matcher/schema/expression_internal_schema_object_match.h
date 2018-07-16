@@ -38,7 +38,8 @@ public:
 
     InternalSchemaObjectMatchExpression(StringData path, std::unique_ptr<MatchExpression> expr);
 
-    bool matchesSingleElement(const BSONElement& elem, MatchDetails* details = nullptr) const final;
+    bool matchesSingleElement(const BSONElement& elem,
+                              ArrayPositionalMatch* details = nullptr) const final;
 
     std::unique_ptr<MatchExpression> shallowClone() const final;
 

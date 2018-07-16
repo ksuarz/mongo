@@ -34,10 +34,10 @@
 #include "mongo/base/disallow_copying.h"
 #include "mongo/base/status.h"
 #include "mongo/bson/bsonobj.h"
+#include "mongo/db/matcher/array_positional_match.h"
 #include "mongo/db/matcher/expression.h"
 #include "mongo/db/matcher/expression_parser.h"
 #include "mongo/db/matcher/extensions_callback_noop.h"
-#include "mongo/db/matcher/match_details.h"
 
 
 namespace mongo {
@@ -60,7 +60,7 @@ public:
             MatchExpressionParser::AllowedFeatureSet allowedFeatures =
                 MatchExpressionParser::kDefaultSpecialFeatures);
 
-    bool matches(const BSONObj& doc, MatchDetails* details = NULL) const;
+    bool matches(const BSONObj& doc, ArrayPositionalMatch* details = NULL) const;
 
     const BSONObj* getQuery() const {
         return &_pattern;

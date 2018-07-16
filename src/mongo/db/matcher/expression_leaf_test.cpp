@@ -213,15 +213,15 @@ TEST(EqOp, MatchesThroughNestedArray) {
 TEST(EqOp, ElemMatchKey) {
     BSONObj operand = BSON("a" << 5);
     EqualityMatchExpression eq("a", operand["a"]);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!eq.matchesBSON(BSON("a" << 4), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(eq.matchesBSON(BSON("a" << 5), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(eq.matchesBSON(BSON("a" << BSON_ARRAY(1 << 2 << 5)), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("2", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("2", *details.arrayPosition());
 }
 
 // SERVER-14886: when an array is being traversed explictly at the same time that a nested array
@@ -231,12 +231,12 @@ TEST(EqOp, ElemMatchKeyWithImplicitAndExplicitTraversal) {
     BSONObj operand = BSON("a.0.b" << 3);
     BSONElement operandFirstElt = operand.firstElement();
     EqualityMatchExpression eq(operandFirstElt.fieldName(), operandFirstElt);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     BSONObj obj = fromjson("{a: [{b: [2, 3]}, {b: [4, 5]}]}");
     ASSERT(eq.matchesBSON(obj, &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(EqOp, Equality1) {
@@ -360,15 +360,15 @@ TEST(LtOp, MatchesMaxKey) {
 TEST(LtOp, ElemMatchKey) {
     BSONObj operand = BSON("$lt" << 5);
     LTMatchExpression lt("a", operand["$lt"]);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!lt.matchesBSON(BSON("a" << 6), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(lt.matchesBSON(BSON("a" << 4), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(lt.matchesBSON(BSON("a" << BSON_ARRAY(6 << 2 << 5)), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(LteOp, MatchesElement) {
@@ -475,15 +475,15 @@ TEST(LteOp, MatchesMaxKey) {
 TEST(LteOp, ElemMatchKey) {
     BSONObj operand = BSON("$lte" << 5);
     LTEMatchExpression lte("a", operand["$lte"]);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!lte.matchesBSON(BSON("a" << 6), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(lte.matchesBSON(BSON("a" << 4), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(lte.matchesBSON(BSON("a" << BSON_ARRAY(6 << 2 << 5)), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 DEATH_TEST(GtOp, InvalidEooOperand, "Invariant failure _rhs") {
@@ -577,15 +577,15 @@ TEST(GtOp, MatchesMaxKey) {
 TEST(GtOp, ElemMatchKey) {
     BSONObj operand = BSON("$gt" << 5);
     GTMatchExpression gt("a", operand["$gt"]);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!gt.matchesBSON(BSON("a" << 4), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(gt.matchesBSON(BSON("a" << 6), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(gt.matchesBSON(BSON("a" << BSON_ARRAY(2 << 6 << 5)), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(GteOp, MatchesElement) {
@@ -692,15 +692,15 @@ TEST(GteOp, MatchesMaxKey) {
 TEST(GteOp, ElemMatchKey) {
     BSONObj operand = BSON("$gte" << 5);
     GTEMatchExpression gte("a", operand["$gte"]);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!gte.matchesBSON(BSON("a" << 4), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(gte.matchesBSON(BSON("a" << 6), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(gte.matchesBSON(BSON("a" << BSON_ARRAY(2 << 6 << 5)), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(RegexMatchExpression, MatchesElementExact) {
@@ -887,21 +887,21 @@ TEST(RegexMatchExpression, MatchesNull) {
 
 TEST(RegexMatchExpression, ElemMatchKey) {
     RegexMatchExpression regex("a", "b", "");
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!regex.matchesBSON(BSON("a"
                                    << "c"),
                               &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(regex.matchesBSON(BSON("a"
                                   << "b"),
                              &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(regex.matchesBSON(BSON("a" << BSON_ARRAY("c"
                                                     << "b")),
                              &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(RegexMatchExpression, Equality1) {
@@ -1032,15 +1032,15 @@ TEST(ModMatchExpression, MatchesNull) {
 
 TEST(ModMatchExpression, ElemMatchKey) {
     ModMatchExpression mod("a", 5, 2);
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!mod.matchesBSON(BSON("a" << 4), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(mod.matchesBSON(BSON("a" << 2), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(mod.matchesBSON(BSON("a" << BSON_ARRAY(1 << 2 << 5)), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(ModMatchExpression, Equality1) {
@@ -1087,15 +1087,15 @@ TEST(ExistsMatchExpression, MatchesArray) {
 
 TEST(ExistsMatchExpression, ElemMatchKey) {
     ExistsMatchExpression exists("a.b");
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!exists.matchesBSON(BSON("a" << 1), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(exists.matchesBSON(BSON("a" << BSON("b" << 6)), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(exists.matchesBSON(BSON("a" << BSON_ARRAY(2 << BSON("b" << 7))), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(ExistsMatchExpression, Equivalent) {
@@ -1227,15 +1227,15 @@ TEST(InMatchExpression, ElemMatchKey) {
     std::vector<BSONElement> equalities{operand[0], operand[1]};
     ASSERT_OK(in.setEqualities(std::move(equalities)));
 
-    MatchDetails details;
-    details.requestElemMatchKey();
+    ArrayPositionalMatch details;
+    details.requestArrayPosition();
     ASSERT(!in.matchesBSON(BSON("a" << 4), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(in.matchesBSON(BSON("a" << 5), &details));
-    ASSERT(!details.hasElemMatchKey());
+    ASSERT(!details.arrayPosition());
     ASSERT(in.matchesBSON(BSON("a" << BSON_ARRAY(1 << 2 << 5)), &details));
-    ASSERT(details.hasElemMatchKey());
-    ASSERT_EQUALS("1", details.elemMatchKey());
+    ASSERT(details.arrayPosition());
+    ASSERT_EQUALS("1", *details.arrayPosition());
 }
 
 TEST(InMatchExpression, InMatchExpressionsWithDifferentNumbersOfElementsAreUnequal) {

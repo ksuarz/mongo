@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 MongoDB Inc.
+ * Copyright (C) 2018 MongoDB Inc.
  *
  * This program is free software: you can redistribute it and/or  modify
  * it under the terms of the GNU Affero General Public License, version 3,
@@ -26,43 +26,59 @@
  * then also delete it in the license file.
  */
 
-#include "mongo/platform/basic.h"
+#pragma once
 
-#include "mongo/db/matcher/expression_internal_expr_eq.h"
+#include <boost/optional.hpp>
+#include <memory>
+#include <string>
 
-#include "mongo/bson/bsonobj.h"
-#include "mongo/bson/bsonobjbuilder.h"
+#include "mongo/base/string_data.h"
 
 namespace mongo {
+/**
+ * Stores the offset into an array for which an element satisfies a match predicate. Used for
+ * $elemMatch and $-positional projections.
+ */
+class ArrayPositionalMatch {
+public:
+    ArrayPositionalMatch() = default;
 
-constexpr StringData InternalExprEqMatchExpression::kName;
-
-bool InternalExprEqMatchExpression::matchesSingleElement(const BSONElement& elem,
-                                                         ArrayPositionalMatch* details) const {
-    // We use NonLeafArrayBehavior::kMatchSubpath traversal in InternalExprEqMatchExpression. This
-    // means matchesSinglElement() will be called when an array is found anywhere along the patch we
-    // are matching against. When this occurs, we return 'true' and depend on the corresponding
-    // ExprMatchExpression node to filter properly.
-    if (elem.type() == BSONType::Array) {
-        return true;
+    /**
+     * Returns true if a request has been made to store the array offset.
+     */
+    bool arrayPositionRequested() const {
+        return _arrayPositionRequested;
     }
 
-    if (elem.canonicalType() != _rhs.canonicalType()) {
-        return false;
+    /**
+     * The array offset that satisfies the match predicate, if set.
+     */
+    boost::optional<std::string> arrayPosition() const {
+        return _arrayPosition;
     }
 
-    auto comp = BSONElement::compareElements(
-        elem, _rhs, BSONElement::ComparisonRules::kConsiderFieldName, _collator);
-    return comp == 0;
-}
+    /**
+     * Requests that the array match position be recorded.
+     */
+    void requestArrayPosition();
 
-std::unique_ptr<MatchExpression> InternalExprEqMatchExpression::shallowClone() const {
-    auto clone = stdx::make_unique<InternalExprEqMatchExpression>(path(), _rhs);
-    clone->setCollator(_collator);
-    if (getTag()) {
-        clone->setTag(getTag()->clone());
-    }
-    return std::move(clone);
-}
+    /**
+     * Sets the array match position to 'pos'. No effect if the array position has not been
+     * requested.
+     */
+    void setArrayPosition(StringData pos);
 
-}  //  namespace mongo
+    /**
+     * Resets any recorded array position. (If the position has been requested, though, it remains
+     * requested.)
+     */
+    void reset();
+
+private:
+    bool _arrayPositionRequested;
+
+    // If set, this contains the array index for which a match predicate was satisfied. The index is
+    // stored as a field name string (e.g. "1").
+    boost::optional<std::string> _arrayPosition;
+};
+}  // namespace mongo
