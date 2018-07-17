@@ -167,7 +167,8 @@ public:
     virtual ~ComparisonMatchExpression() = default;
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 };
 
 class EqualityMatchExpression final : public ComparisonMatchExpression {
@@ -302,7 +303,8 @@ public:
     }
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 
@@ -347,7 +349,8 @@ public:
     }
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 
@@ -384,7 +387,8 @@ public:
     }
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 
@@ -408,7 +412,8 @@ public:
     virtual std::unique_ptr<MatchExpression> shallowClone() const;
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 
@@ -498,7 +503,8 @@ public:
     virtual ~BitTestMatchExpression() {}
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 

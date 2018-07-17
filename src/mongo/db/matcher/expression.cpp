@@ -56,14 +56,18 @@ void MatchExpression::_debugAddSpace(StringBuilder& debug, int level) const {
         debug << "    ";
 }
 
-bool MatchExpression::matchesBSON(const BSONObj& doc, ArrayPositionalMatch* details) const {
+bool MatchExpression::matchesBSON(const BSONObj& doc,
+                                  ArrayPositionalMatch* details,
+                                  std::deque<std::string>* explain) const {
     BSONMatchableDocument mydoc(doc);
-    return matches(&mydoc, details);
+    return matches(&mydoc, details, explain);
 }
 
-bool MatchExpression::matchesBSONElement(BSONElement elem, ArrayPositionalMatch* details) const {
+bool MatchExpression::matchesBSONElement(BSONElement elem,
+                                         ArrayPositionalMatch* details,
+                                         std::deque<std::string>* explain) const {
     BSONElementViewMatchableDocument matchableDoc(elem);
-    return matches(&matchableDoc, details);
+    return matches(&matchableDoc, details, explain);
 }
 
 void MatchExpression::setCollator(const CollatorInterface* collator) {

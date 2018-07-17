@@ -50,7 +50,8 @@ public:
     }
 
     bool matchesSingleElement(const BSONElement& e,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     void debugString(StringBuilder& debug, int level) const final;
 

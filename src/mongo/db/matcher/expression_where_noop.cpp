@@ -40,7 +40,8 @@ WhereNoOpMatchExpression::WhereNoOpMatchExpression(WhereParams params)
     : WhereMatchExpressionBase(std::move(params)) {}
 
 bool WhereNoOpMatchExpression::matches(const MatchableDocument* doc,
-                                       ArrayPositionalMatch* details) const {
+                                       ArrayPositionalMatch* details,
+                                       std::deque<std::string>* explain) const {
     MONGO_UNREACHABLE;
 }
 

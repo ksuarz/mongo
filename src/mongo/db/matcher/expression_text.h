@@ -49,7 +49,8 @@ public:
     }
 
     bool matchesSingleElement(const BSONElement& e,
-                              ArrayPositionalMatch* details = nullptr) const final {
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final {
         // Text match expressions force the selection of the text index and always generate EXACT
         // index bounds (which causes the MatchExpression node to be trimmed), so we don't currently
         // implement any explicit text matching logic here. SERVER-17648 tracks the work to

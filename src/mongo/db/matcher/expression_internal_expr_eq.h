@@ -65,7 +65,9 @@ public:
         return kName;
     }
 
-    bool matchesSingleElement(const BSONElement&, ArrayPositionalMatch*) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch*,
+                              std::deque<std::string>* explain) const final;
 
     std::unique_ptr<MatchExpression> shallowClone() const final;
 };

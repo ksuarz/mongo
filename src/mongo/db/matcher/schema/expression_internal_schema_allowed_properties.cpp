@@ -87,13 +87,15 @@ bool InternalSchemaAllowedPropertiesMatchExpression::equivalent(const MatchExpre
                             });
 }
 
-bool InternalSchemaAllowedPropertiesMatchExpression::matches(const MatchableDocument* doc,
-                                                             ArrayPositionalMatch* details) const {
+bool InternalSchemaAllowedPropertiesMatchExpression::matches(
+    const MatchableDocument* doc,
+    ArrayPositionalMatch* details,
+    std::deque<std::string>* explain) const {
     return _matchesBSONObj(doc->toBSON());
 }
 
 bool InternalSchemaAllowedPropertiesMatchExpression::matchesSingleElement(
-    const BSONElement& elem, ArrayPositionalMatch*) const {
+    const BSONElement& elem, ArrayPositionalMatch*, std::deque<std::string>* explain) const {
     if (elem.type() != BSONType::Object) {
         return false;
     }

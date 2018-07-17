@@ -34,13 +34,16 @@ namespace mongo {
 constexpr StringData InternalSchemaCondMatchExpression::kName;
 
 bool InternalSchemaCondMatchExpression::matches(const MatchableDocument* doc,
-                                                ArrayPositionalMatch* details) const {
+                                                ArrayPositionalMatch* details,
+                                                std::deque<std::string>* explain) const {
     return condition()->matches(doc, details) ? thenBranch()->matches(doc, details)
                                               : elseBranch()->matches(doc, details);
 }
 
-bool InternalSchemaCondMatchExpression::matchesSingleElement(const BSONElement& elem,
-                                                             ArrayPositionalMatch* details) const {
+bool InternalSchemaCondMatchExpression::matchesSingleElement(
+    const BSONElement& elem,
+    ArrayPositionalMatch* details,
+    std::deque<std::string>* explain) const {
     return condition()->matchesSingleElement(elem, details)
         ? thenBranch()->matchesSingleElement(elem, details)
         : elseBranch()->matchesSingleElement(elem, details);

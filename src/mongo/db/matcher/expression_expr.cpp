@@ -41,7 +41,8 @@ ExprMatchExpression::ExprMatchExpression(BSONElement elem,
                           expCtx) {}
 
 bool ExprMatchExpression::matches(const MatchableDocument* doc,
-                                  ArrayPositionalMatch* details) const {
+                                  ArrayPositionalMatch* details,
+                                  std::deque<std::string>* explain) const {
     if (_rewriteResult && _rewriteResult->matchExpression() &&
         !_rewriteResult->matchExpression()->matches(doc, details)) {
         return false;

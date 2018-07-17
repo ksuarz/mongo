@@ -113,7 +113,8 @@ ComparisonMatchExpression::ComparisonMatchExpression(MatchType type,
 }
 
 bool ComparisonMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                     ArrayPositionalMatch* details) const {
+                                                     ArrayPositionalMatch* details,
+                                                     std::deque<std::string>* explain) const {
     if (e.canonicalType() != _rhs.canonicalType()) {
         // We can't call 'compareElements' on elements of different canonical types.  Usually
         // elements with different canonical types should never match any comparison, but there are
@@ -153,40 +154,54 @@ bool ComparisonMatchExpression::matchesSingleElement(const BSONElement& e,
         bool bothNaN = std::isnan(e.numberDouble()) && std::isnan(_rhs.numberDouble());
         switch (matchType()) {
             case LT:
+            case GT:
+                if (explain) {
+                    explain->push_front(str::stream() << e.toString(false) << " is not " << name()
+                                                      << " "
+                                                      << _rhs.toString(false));
+                }
                 return false;
             case LTE:
-                return bothNaN;
             case EQ:
-                return bothNaN;
-            case GT:
-                return false;
             case GTE:
+                if (!bothNaN && explain) {
+                    explain->push_front(str::stream() << e.toString(false) << " is not " << name()
+                                                      << " "
+                                                      << _rhs.toString(false));
+                }
                 return bothNaN;
             default:
-                // This is a comparison match expression, so it must be either
-                // a $lt, $lte, $gt, $gte, or equality expression.
-                fassertFailed(17448);
+                MONGO_UNREACHABLE;
         }
     }
 
     int x = BSONElement::compareElements(
         e, _rhs, BSONElement::ComparisonRules::kConsiderFieldName, _collator);
+    bool res;
     switch (matchType()) {
         case LT:
-            return x < 0;
+            res = x < 0;
+            break;
         case LTE:
-            return x <= 0;
+            res = x <= 0;
+            break;
         case EQ:
-            return x == 0;
+            res = x == 0;
+            break;
         case GT:
-            return x > 0;
+            res = x > 0;
+            break;
         case GTE:
-            return x >= 0;
+            res = x >= 0;
+            break;
         default:
-            // This is a comparison match expression, so it must be either
-            // a $lt, $lte, $gt, $gte, or equality expression.
-            fassertFailed(16828);
+            MONGO_UNREACHABLE;
     }
+    if (!res && explain) {
+        explain->push_front(str::stream() << e.toString(false) << " is not " << name() << " "
+                                          << _rhs.toString(false));
+    }
+    return res;
 }
 
 constexpr StringData EqualityMatchExpression::kName;
@@ -259,7 +274,8 @@ bool RegexMatchExpression::equivalent(const MatchExpression* other) const {
 }
 
 bool RegexMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                ArrayPositionalMatch* details) const {
+                                                ArrayPositionalMatch* details,
+                                                std::deque<std::string>* explain) const {
     switch (e.type()) {
         case String:
         case Symbol: {
@@ -267,11 +283,35 @@ bool RegexMatchExpression::matchesSingleElement(const BSONElement& e,
             // pcrecpp::StringPiece instance using the full length of the string to avoid truncating
             // 'data' early.
             pcrecpp::StringPiece data(e.valuestr(), e.valuestrsize() - 1);
-            return _re->PartialMatch(data);
+            bool res = _re->PartialMatch(data);
+            if (!res && explain) {
+                explain->push_front(
+                    str::stream() << e.valueStringData() << " does not match {regex: " << _regex
+                                  << ", flags: "
+                                  << _flags
+                                  << "}");
+            }
+            return res;
         }
-        case RegEx:
-            return _regex == e.regex() && _flags == e.regexFlags();
+        case RegEx: {
+            bool res = (_regex == e.regex() && _flags == e.regexFlags());
+            if (!res && explain) {
+                explain->push_front(str::stream() << "{regex: " << _regex << ", flags: " << _flags
+                                                  << "} is not equal to "
+                                                  << "{regex: "
+                                                  << e.regex()
+                                                  << ", flags: "
+                                                  << e.regexFlags()
+                                                  << "}");
+            }
+            return res;
+        }
         default:
+            if (explain) {
+                explain->push_front(str::stream() << "regex " << _regex
+                                                  << " won't match element of type "
+                                                  << e.type());
+            }
             return false;
     }
 }
@@ -315,7 +355,8 @@ ModMatchExpression::ModMatchExpression(StringData path, int divisor, int remaind
 }
 
 bool ModMatchExpression::matchesSingleElement(const BSONElement& e,
-                                              ArrayPositionalMatch* details) const {
+                                              ArrayPositionalMatch* details,
+                                              std::deque<std::string>* explain) const {
     if (!e.isNumber())
         return false;
     return e.numberLong() % _divisor == _remainder;
@@ -351,7 +392,8 @@ bool ModMatchExpression::equivalent(const MatchExpression* other) const {
 ExistsMatchExpression::ExistsMatchExpression(StringData path) : LeafMatchExpression(EXISTS, path) {}
 
 bool ExistsMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                 ArrayPositionalMatch* details) const {
+                                                 ArrayPositionalMatch* details,
+                                                 std::deque<std::string>* explain) const {
     return !e.eoo();
 }
 
@@ -405,7 +447,8 @@ std::unique_ptr<MatchExpression> InMatchExpression::shallowClone() const {
 }
 
 bool InMatchExpression::matchesSingleElement(const BSONElement& e,
-                                             ArrayPositionalMatch* details) const {
+                                             ArrayPositionalMatch* details,
+                                             std::deque<std::string>* explain) const {
     if (_hasNull && e.eoo()) {
         return true;
     }
@@ -694,7 +737,8 @@ bool BitTestMatchExpression::performBitTest(const char* eBinary, uint32_t eBinar
 }
 
 bool BitTestMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                  ArrayPositionalMatch* details) const {
+                                                  ArrayPositionalMatch* details,
+                                                  std::deque<std::string>* explain) const {
     // Validate 'e' is a number or a BinData.
     if (!e.isNumber() && e.type() != BSONType::BinData) {
         return false;

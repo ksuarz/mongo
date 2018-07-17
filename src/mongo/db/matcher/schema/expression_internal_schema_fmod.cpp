@@ -47,8 +47,8 @@ InternalSchemaFmodMatchExpression::InternalSchemaFmodMatchExpression(StringData 
     uassert(ErrorCodes::BadValue, "divisor cannot be infinite", !divisor.isInfinite());
 }
 
-bool InternalSchemaFmodMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                             ArrayPositionalMatch* details) const {
+bool InternalSchemaFmodMatchExpression::matchesSingleElement(
+    const BSONElement& e, ArrayPositionalMatch* details, std::deque<std::string>* explain) const {
     if (!e.isNumber()) {
         return false;
     }

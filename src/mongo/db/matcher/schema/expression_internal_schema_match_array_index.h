@@ -52,7 +52,9 @@ public:
      * Matches 'array' if the element at '_index' matches '_expression', or if its size is less than
      * '_index'.
      */
-    bool matchesArray(const BSONObj& array, ArrayPositionalMatch* details) const final {
+    bool matchesArray(const BSONObj& array,
+                      ArrayPositionalMatch* details,
+                      std::deque<std::string>* explain) const final {
         BSONElement element;
         auto iterator = BSONObjIterator(array);
 
@@ -64,7 +66,12 @@ public:
             element = iterator.next();
         }
 
-        return _expression->matchesBSONElement(element, details);
+        bool match = _expression->matchesBSONElement(element, details);
+        if (!match && explain) {
+            explain->push_front(str::stream() << "element " << _index << " of array '" << path()
+                                              << "' does not match: ");
+        }
+        return match;
     }
 
     void serialize(BSONObjBuilder* builder) const final;

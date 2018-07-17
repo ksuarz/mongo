@@ -39,7 +39,9 @@ class WhereMatchExpression final : public WhereMatchExpressionBase {
 public:
     WhereMatchExpression(OperationContext* opCtx, WhereParams params, StringData dbName);
 
-    bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details = nullptr) const final;
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* explain = nullptr) const final;
 
     std::unique_ptr<MatchExpression> shallowClone() const final;
 

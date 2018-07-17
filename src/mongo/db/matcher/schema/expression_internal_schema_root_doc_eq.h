@@ -51,14 +51,17 @@ public:
     explicit InternalSchemaRootDocEqMatchExpression(BSONObj rhs)
         : MatchExpression(MatchExpression::INTERNAL_SCHEMA_ROOT_DOC_EQ), _rhsObj(std::move(rhs)) {}
 
-    bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details = nullptr) const final;
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* explain = nullptr) const final;
 
     /**
      * This expression should only be used to match full documents, not objects within an array
      * in the case of $elemMatch.
      */
     bool matchesSingleElement(const BSONElement& elem,
-                              ArrayPositionalMatch* details = nullptr) const final {
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final {
         MONGO_UNREACHABLE;
     }
 

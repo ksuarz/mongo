@@ -43,7 +43,9 @@ public:
         : InternalSchemaNumArrayItemsMatchExpression(
               INTERNAL_SCHEMA_MIN_ITEMS, path, numItems, "$_internalSchemaMinItems"_sd) {}
 
-    bool matchesArray(const BSONObj& anArray, ArrayPositionalMatch* details) const final {
+    bool matchesArray(const BSONObj& anArray,
+                      ArrayPositionalMatch* details,
+                      std::deque<std::string>* explain) const final {
         return (anArray.nFields() >= numItems());
     }
 

@@ -69,9 +69,12 @@ public:
      * If the input object matches 'condition', returns the result of matching it against
      * 'thenBranch'. Otherwise, returns the result of matching it against 'elseBranch'.
      */
-    bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details = nullptr) const final;
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* explain = nullptr) const final;
     bool matchesSingleElement(const BSONElement& elem,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 };
 
 }  // namespace mongo

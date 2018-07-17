@@ -118,7 +118,7 @@ public:
                  Snapshotted<BSONObj>* out) const final;
 
     std::unique_ptr<SeekableRecordCursor> getCursor(OperationContext* opCtx,
-                                                    bool forward = true) const final;
+                                                    bool forward) const final;
 
     /**
      * Deletes the document with the given RecordId from the collection.

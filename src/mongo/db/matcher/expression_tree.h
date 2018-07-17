@@ -111,10 +111,13 @@ public:
     AndMatchExpression() : ListOfMatchExpression(AND) {}
     virtual ~AndMatchExpression() {}
 
-    virtual bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details = 0) const;
+    virtual bool matches(const MatchableDocument* doc,
+                         ArrayPositionalMatch* = nullptr,
+                         std::deque<std::string>* = nullptr) const;
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         std::unique_ptr<AndMatchExpression> self = stdx::make_unique<AndMatchExpression>();
@@ -141,10 +144,13 @@ public:
     OrMatchExpression() : ListOfMatchExpression(OR) {}
     virtual ~OrMatchExpression() {}
 
-    virtual bool matches(const MatchableDocument* doc, ArrayPositionalMatch* = nullptr) const;
+    virtual bool matches(const MatchableDocument* doc,
+                         ArrayPositionalMatch* = nullptr,
+                         std::deque<std::string>* = nullptr) const;
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         std::unique_ptr<OrMatchExpression> self = stdx::make_unique<OrMatchExpression>();
@@ -171,10 +177,13 @@ public:
     NorMatchExpression() : ListOfMatchExpression(NOR) {}
     virtual ~NorMatchExpression() {}
 
-    virtual bool matches(const MatchableDocument* doc, ArrayPositionalMatch* = nullptr) const;
+    virtual bool matches(const MatchableDocument* doc,
+                         ArrayPositionalMatch* = nullptr,
+                         std::deque<std::string>* = nullptr) const;
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         std::unique_ptr<NorMatchExpression> self = stdx::make_unique<NorMatchExpression>();
@@ -205,15 +214,27 @@ public:
         return std::move(self);
     }
 
-    virtual bool matches(const MatchableDocument* doc, ArrayPositionalMatch* = nullptr) const {
+    virtual bool matches(const MatchableDocument* doc,
+                         ArrayPositionalMatch* = nullptr,
+                         std::deque<std::string>* explain = nullptr) const {
         // We purposefully do not set the ArrayPositionalMatch for negative match expressions. Users
         // can use the array filters feature to find the array position of a non-matching element.
         constexpr auto positionalMatch = nullptr;
-        return !_exp->matches(doc, positionalMatch);
+        bool res = !_exp->matches(doc, positionalMatch, explain);
+        if (!res && explain) {
+            explain->push_front(str::stream() << "subclause evaluated true: " << _exp->toString());
+        }
+        return res;
     }
 
-    bool matchesSingleElement(const BSONElement& elt, ArrayPositionalMatch* details = nullptr) const final {
-        return !_exp->matchesSingleElement(elt, details);
+    bool matchesSingleElement(const BSONElement& elt,
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final {
+        bool res = !_exp->matchesSingleElement(elt, details, explain);
+        if (!res && explain) {
+            explain->push_front(str::stream() << "subclause evaluated true: " << _exp->toString());
+        }
+        return res;
     }
 
     virtual void debugString(StringBuilder& debug, int level = 0) const;

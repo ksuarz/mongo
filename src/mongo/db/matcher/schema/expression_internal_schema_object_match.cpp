@@ -43,11 +43,16 @@ InternalSchemaObjectMatchExpression::InternalSchemaObjectMatchExpression(
       _sub(std::move(expr)) {}
 
 bool InternalSchemaObjectMatchExpression::matchesSingleElement(
-    const BSONElement& elem, ArrayPositionalMatch* details) const {
+    const BSONElement& elem,
+    ArrayPositionalMatch* details,
+    std::deque<std::string>* explain) const {
     if (elem.type() != BSONType::Object) {
+        if (explain) {
+            explain->push_front(str::stream() << "'" << path() << "' is not an object");
+        }
         return false;
     }
-    return _sub->matchesBSON(elem.Obj());
+    return _sub->matchesBSON(elem.embeddedObject(), details, explain);
 }
 
 void InternalSchemaObjectMatchExpression::debugString(StringBuilder& debug, int level) const {

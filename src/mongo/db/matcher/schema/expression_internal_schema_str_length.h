@@ -48,7 +48,8 @@ public:
     virtual Validator getComparator() const = 0;
 
     bool matchesSingleElement(const BSONElement& elem,
-                              ArrayPositionalMatch* details = nullptr) const final {
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final {
         if (elem.type() != BSONType::String) {
             return false;
         }

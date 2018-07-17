@@ -60,10 +60,19 @@ public:
         return nullptr;
     }
 
-    bool matchesArray(const BSONObj& array, ArrayPositionalMatch*) const final {
+    bool matchesArray(const BSONObj& array,
+                      ArrayPositionalMatch*,
+                      std::deque<std::string>* explain) const final {
         auto set = _comparator.makeBSONEltSet();
-        for (auto&& elem : array) {
+        for (const auto& elem : array) {
             if (!std::get<bool>(set.insert(elem))) {
+                if (explain) {
+                    explain->push_front(
+                        str::stream()
+                        << "array does not have unique contents; duplicates of element with value "
+                        << elem.toString(false)
+                        << " exist");
+                }
                 return false;
             }
         }

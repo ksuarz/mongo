@@ -131,9 +131,12 @@ public:
      *  - any field not contained in '_properties' nor matching a pattern in '_patternProperties'
      *    matches the '_otherwise' match expression.
      */
-    bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details) const final;
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details,
+                 std::deque<std::string>* explain) const final;
     bool matchesSingleElement(const BSONElement& element,
-                              ArrayPositionalMatch* details) const final;
+                              ArrayPositionalMatch* details,
+                              std::deque<std::string>* explain) const final;
 
     void serialize(BSONObjBuilder* builder) const final;
 

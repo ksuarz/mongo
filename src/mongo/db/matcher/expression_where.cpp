@@ -71,7 +71,8 @@ WhereMatchExpression::WhereMatchExpression(OperationContext* opCtx,
 }
 
 bool WhereMatchExpression::matches(const MatchableDocument* doc,
-                                   ArrayPositionalMatch* details) const {
+                                   ArrayPositionalMatch* details,
+                                   std::deque<std::string>* explain) const {
     uassert(28692, "$where compile error", _func);
     BSONObj obj = doc->toBSON();
 

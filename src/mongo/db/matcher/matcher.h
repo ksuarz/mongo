@@ -60,7 +60,9 @@ public:
             MatchExpressionParser::AllowedFeatureSet allowedFeatures =
                 MatchExpressionParser::kDefaultSpecialFeatures);
 
-    bool matches(const BSONObj& doc, ArrayPositionalMatch* details = NULL) const;
+    bool matches(const BSONObj& doc,
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* = nullptr) const;
 
     const BSONObj* getQuery() const {
         return &_pattern;

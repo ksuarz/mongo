@@ -194,11 +194,15 @@ bool ListOfMatchExpression::equivalent(const MatchExpression* other) const {
 // -----
 
 bool AndMatchExpression::matches(const MatchableDocument* doc,
-                                 ArrayPositionalMatch* details) const {
+                                 ArrayPositionalMatch* details,
+                                 std::deque<std::string>* explain) const {
     for (size_t i = 0; i < numChildren(); i++) {
-        if (!getChild(i)->matches(doc, details)) {
+        if (!getChild(i)->matches(doc, details, explain)) {
             if (details)
                 details->reset();
+            if (explain) {
+                explain->push_front(str::stream() << "clause " << i << " of $and failed: ");
+            }
             return false;
         }
     }
@@ -206,9 +210,13 @@ bool AndMatchExpression::matches(const MatchableDocument* doc,
 }
 
 bool AndMatchExpression::matchesSingleElement(const BSONElement& e,
-                                              ArrayPositionalMatch* details) const {
+                                              ArrayPositionalMatch* details,
+                                              std::deque<std::string>* explain) const {
     for (size_t i = 0; i < numChildren(); i++) {
-        if (!getChild(i)->matchesSingleElement(e, details)) {
+        if (!getChild(i)->matchesSingleElement(e, details, explain)) {
+            if (explain) {
+                explain->push_front(str::stream() << "clause " << i << " of $and failed: ");
+            }
             return false;
         }
     }
@@ -240,22 +248,32 @@ bool AndMatchExpression::isTriviallyTrue() const {
 
 // -----
 
-bool OrMatchExpression::matches(const MatchableDocument* doc, ArrayPositionalMatch*) const {
+bool OrMatchExpression::matches(const MatchableDocument* doc,
+                                ArrayPositionalMatch*,
+                                std::deque<std::string>* explain) const {
     for (size_t i = 0; i < numChildren(); i++) {
         // We purposefully do not set the ArrayPositionalMatch. Users can use the array filters
         // feature to find the array position of a non-matching element.
         constexpr auto positionalMatch = nullptr;
-        if (getChild(i)->matches(doc, positionalMatch)) {
+        if (getChild(i)->matches(doc, positionalMatch, explain)) {
+            if (explain) {
+                explain->clear();
+            }
             return true;
         }
+    }
+
+    if (explain) {
+        explain->push_front("no clauses of $or were satisfied: ");
     }
     return false;
 }
 
 bool OrMatchExpression::matchesSingleElement(const BSONElement& e,
-                                             ArrayPositionalMatch* details) const {
+                                             ArrayPositionalMatch* details,
+                                             std::deque<std::string>* explain) const {
     for (size_t i = 0; i < numChildren(); i++) {
-        if (getChild(i)->matchesSingleElement(e, details)) {
+        if (getChild(i)->matchesSingleElement(e, details, explain)) {
             return true;
         }
     }
@@ -288,12 +306,13 @@ bool OrMatchExpression::isTriviallyFalse() const {
 // ----
 
 bool NorMatchExpression::matches(const MatchableDocument* doc,
-                                 ArrayPositionalMatch* details) const {
+                                 ArrayPositionalMatch* details,
+                                 std::deque<std::string>* explain) const {
     for (size_t i = 0; i < numChildren(); i++) {
         // We purposefully do not set the ArrayPositionalMatch for negative match expressions. Users
         // can use the array filters feature to find the array position of a non-matching element.
         constexpr auto positionalMatch = nullptr;
-        if (getChild(i)->matches(doc, positionalMatch)) {
+        if (getChild(i)->matches(doc, positionalMatch, explain)) {
             return false;
         }
     }
@@ -301,9 +320,10 @@ bool NorMatchExpression::matches(const MatchableDocument* doc,
 }
 
 bool NorMatchExpression::matchesSingleElement(const BSONElement& e,
-                                              ArrayPositionalMatch* details) const {
+                                              ArrayPositionalMatch* details,
+                                              std::deque<std::string>* explain) const {
     for (size_t i = 0; i < numChildren(); i++) {
-        if (getChild(i)->matchesSingleElement(e, details)) {
+        if (getChild(i)->matchesSingleElement(e, details, explain)) {
             return false;
         }
     }

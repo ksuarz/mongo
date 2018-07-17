@@ -86,7 +86,8 @@ public:
     virtual ~GeoMatchExpression() {}
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level = 0) const;
 
@@ -178,7 +179,8 @@ public:
      * appropriate geo index.
      */
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual void debugString(StringBuilder& debug, int level = 0) const;
 

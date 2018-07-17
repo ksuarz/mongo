@@ -42,10 +42,13 @@ public:
 
     InternalSchemaXorMatchExpression() : ListOfMatchExpression(INTERNAL_SCHEMA_XOR) {}
 
-    bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details = nullptr) const final;
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* explain = nullptr) const final;
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         auto xorCopy = stdx::make_unique<InternalSchemaXorMatchExpression>();

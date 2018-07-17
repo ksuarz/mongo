@@ -38,7 +38,8 @@ namespace mongo {
 constexpr StringData InternalExprEqMatchExpression::kName;
 
 bool InternalExprEqMatchExpression::matchesSingleElement(const BSONElement& elem,
-                                                         ArrayPositionalMatch* details) const {
+                                                         ArrayPositionalMatch* details,
+                                                         std::deque<std::string>* explain) const {
     // We use NonLeafArrayBehavior::kMatchSubpath traversal in InternalExprEqMatchExpression. This
     // means matchesSinglElement() will be called when an array is found anywhere along the patch we
     // are matching against. When this occurs, we return 'true' and depend on the corresponding

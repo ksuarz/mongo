@@ -35,7 +35,8 @@ namespace mongo {
 constexpr StringData InternalSchemaRootDocEqMatchExpression::kName;
 
 bool InternalSchemaRootDocEqMatchExpression::matches(const MatchableDocument* doc,
-                                                     ArrayPositionalMatch* details) const {
+                                                     ArrayPositionalMatch* details,
+                                                     std::deque<std::string>* explain) const {
     return _objCmp.evaluate(doc->toBSON() == _rhsObj);
 }
 

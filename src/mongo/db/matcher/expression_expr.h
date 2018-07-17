@@ -50,11 +50,14 @@ public:
                         const boost::intrusive_ptr<ExpressionContext>& expCtx);
 
     bool matchesSingleElement(const BSONElement& e,
-                              ArrayPositionalMatch* details = nullptr) const final {
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final {
         MONGO_UNREACHABLE;
     }
 
-    bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details = nullptr) const final;
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* explain = nullptr) const final;
 
     std::unique_ptr<MatchExpression> shallowClone() const final;
 

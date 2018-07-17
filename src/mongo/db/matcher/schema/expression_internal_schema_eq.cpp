@@ -48,7 +48,8 @@ InternalSchemaEqMatchExpression::InternalSchemaEqMatchExpression(StringData path
 }
 
 bool InternalSchemaEqMatchExpression::matchesSingleElement(const BSONElement& elem,
-                                                           ArrayPositionalMatch* details) const {
+                                                           ArrayPositionalMatch* details,
+                                                           std::deque<std::string>* explain) const {
     return _eltCmp.evaluate(_rhsElem == elem);
 }
 

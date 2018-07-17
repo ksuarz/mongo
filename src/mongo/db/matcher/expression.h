@@ -213,17 +213,24 @@ public:
     // XXX document
     virtual bool equivalent(const MatchExpression* other) const = 0;
 
+    //
+    // Matching API.
+    //
+
     /**
      * Returns true if 'doc' satisfies the query predicate. If 'details' is set, it is filled with
      * the array offset of the match if requested.
      */
     virtual bool matches(const MatchableDocument* doc,
-                         ArrayPositionalMatch* details = nullptr) const = 0;
+                         ArrayPositionalMatch* details = nullptr,
+                         std::deque<std::string>* explain = nullptr) const = 0;
 
     /**
      * Returns true if the BSONObj satisfies the query predicate.
      */
-    virtual bool matchesBSON(const BSONObj& doc, ArrayPositionalMatch* details = nullptr) const;
+    virtual bool matchesBSON(const BSONObj& doc,
+                             ArrayPositionalMatch* details = nullptr,
+                             std::deque<std::string>* = nullptr) const;
 
     /**
      * Determines if 'elem' would satisfy the predicate if wrapped with the top-level field name of
@@ -233,14 +240,16 @@ public:
      * 5}.
      */
     virtual bool matchesBSONElement(BSONElement elem,
-                                    ArrayPositionalMatch* details = nullptr) const;
+                                    ArrayPositionalMatch* details = nullptr,
+                                    std::deque<std::string>* = nullptr) const;
 
     /**
      * Determines if the element satisfies the tree-predicate.
      * Not valid for all expressions (e.g. $where); in those cases, returns false.
      */
     virtual bool matchesSingleElement(const BSONElement& e,
-                                      ArrayPositionalMatch* details = nullptr) const = 0;
+                                      ArrayPositionalMatch* details = nullptr,
+                                      std::deque<std::string>* = nullptr) const = 0;
 
     //
     // Tagging mechanism: Hang data off of the tree for retrieval later.

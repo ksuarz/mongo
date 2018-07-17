@@ -43,8 +43,17 @@ public:
         : InternalSchemaNumArrayItemsMatchExpression(
               INTERNAL_SCHEMA_MAX_ITEMS, path, numItems, "$_internalSchemaMaxItems"_sd) {}
 
-    bool matchesArray(const BSONObj& anArray, ArrayPositionalMatch* details) const final {
-        return (anArray.nFields() <= numItems());
+    bool matchesArray(const BSONObj& anArray,
+                      ArrayPositionalMatch* details,
+                      std::deque<std::string>* explain) const final {
+        bool match = (anArray.nFields() <= numItems());
+        if (!match && explain) {
+            explain->push_front(str::stream() << "array '" << path() << "' has "
+                                              << anArray.nFields()
+                                              << " elements, over the limit of "
+                                              << numItems());
+        }
+        return match;
     }
 
     std::unique_ptr<MatchExpression> shallowClone() const final {

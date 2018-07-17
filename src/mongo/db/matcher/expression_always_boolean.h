@@ -45,12 +45,14 @@ public:
     virtual StringData name() const = 0;
 
     bool matches(const MatchableDocument* doc,
-                 ArrayPositionalMatch* details = nullptr) const final {
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* explain = nullptr) const final {
         return _value;
     }
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final {
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final {
         return _value;
     }
 

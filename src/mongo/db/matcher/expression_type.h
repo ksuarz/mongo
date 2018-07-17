@@ -60,8 +60,21 @@ public:
     }
 
     bool matchesSingleElement(const BSONElement& elem,
-                              ArrayPositionalMatch* details = nullptr) const final {
-        return _typeSet.hasType(elem.type());
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final {
+        bool match = _typeSet.hasType(elem.type());
+        if (!match && explain) {
+            StringBuilder builder;
+            builder << "[";
+            for (auto&& type : _typeSet.bsonTypes) {
+                builder << typeName(type) << ", ";
+            }
+            builder << "]";
+            explain->push_front(str::stream() << "element of type " << elem.type()
+                                              << " does not match $type "
+                                              << builder.str());
+        }
+        return match;
     }
 
     void debugString(StringBuilder& debug, int level) const final {

@@ -36,12 +36,16 @@
 namespace mongo {
 
 bool ArrayMatchingMatchExpression::matchesSingleElement(const BSONElement& elt,
-                                                        ArrayPositionalMatch* details) const {
+                                                        ArrayPositionalMatch* details,
+                                                        std::deque<std::string>* explain) const {
     if (elt.type() != BSONType::Array) {
+        if (explain) {
+            explain->push_front(str::stream() << elt.fieldNameStringData() << " is not an array");
+        }
         return false;
     }
 
-    return matchesArray(elt.embeddedObject(), details);
+    return matchesArray(elt.embeddedObject(), details, explain);
 }
 
 
@@ -72,18 +76,23 @@ ElemMatchObjectMatchExpression::ElemMatchObjectMatchExpression(StringData path,
     : ArrayMatchingMatchExpression(ELEM_MATCH_OBJECT, path), _sub(sub) {}
 
 bool ElemMatchObjectMatchExpression::matchesArray(const BSONObj& anArray,
-                                                  ArrayPositionalMatch* details) const {
+                                                  ArrayPositionalMatch* details,
+                                                  std::deque<std::string>* explain) const {
     BSONObjIterator i(anArray);
     while (i.more()) {
         BSONElement inner = i.next();
         if (!inner.isABSONObj())
             continue;
-        if (_sub->matchesBSON(inner.Obj(), NULL)) {
+        if (_sub->matchesBSON(inner.Obj(), nullptr, explain)) {
             if (details && details->arrayPositionRequested()) {
                 details->setArrayPosition(inner.fieldNameStringData());
             }
             return true;
         }
+    }
+    if (explain) {
+        explain->push_front(str::stream() << "no elements of array '" << path()
+                                          << "' match the predicate");
     }
     return false;
 }
@@ -138,7 +147,8 @@ void ElemMatchValueMatchExpression::add(MatchExpression* sub) {
 }
 
 bool ElemMatchValueMatchExpression::matchesArray(const BSONObj& anArray,
-                                                 ArrayPositionalMatch* details) const {
+                                                 ArrayPositionalMatch* details,
+                                                 std::deque<std::string>* explain) const {
     BSONObjIterator i(anArray);
     while (i.more()) {
         BSONElement inner = i.next();
@@ -208,7 +218,8 @@ SizeMatchExpression::SizeMatchExpression(StringData path, int size)
     : ArrayMatchingMatchExpression(SIZE, path), _size(size) {}
 
 bool SizeMatchExpression::matchesArray(const BSONObj& anArray,
-                                       ArrayPositionalMatch* details) const {
+                                       ArrayPositionalMatch* details,
+                                       std::deque<std::string>* explain) const {
     if (_size < 0)
         return false;
     return anArray.nFields() == _size;

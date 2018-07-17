@@ -38,7 +38,8 @@ namespace mongo {
 constexpr StringData InternalSchemaXorMatchExpression::kName;
 
 bool InternalSchemaXorMatchExpression::matches(const MatchableDocument* doc,
-                                               ArrayPositionalMatch* details) const {
+                                               ArrayPositionalMatch* details,
+                                               std::deque<std::string>* explain) const {
     bool found = false;
     for (size_t i = 0; i < numChildren(); i++) {
         if (getChild(i)->matches(doc, nullptr)) {
@@ -51,8 +52,10 @@ bool InternalSchemaXorMatchExpression::matches(const MatchableDocument* doc,
     return found;
 }
 
-bool InternalSchemaXorMatchExpression::matchesSingleElement(const BSONElement& element,
-                                                            ArrayPositionalMatch* details) const {
+bool InternalSchemaXorMatchExpression::matchesSingleElement(
+    const BSONElement& element,
+    ArrayPositionalMatch* details,
+    std::deque<std::string>* explain) const {
     bool found = false;
     for (size_t i = 0; i < numChildren(); i++) {
         if (getChild(i)->matchesSingleElement(element, details)) {

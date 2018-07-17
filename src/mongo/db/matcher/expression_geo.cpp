@@ -346,7 +346,8 @@ GeoMatchExpression::GeoMatchExpression(StringData path,
     : LeafMatchExpression(GEO, path), _rawObj(rawObj), _query(query), _canSkipValidation(false) {}
 
 bool GeoMatchExpression::matchesSingleElement(const BSONElement& e,
-                                              ArrayPositionalMatch* details) const {
+                                              ArrayPositionalMatch* details,
+                                              std::deque<std::string>* explain) const {
     if (!e.isABSONObj())
         return false;
 
@@ -431,7 +432,8 @@ GeoNearMatchExpression::GeoNearMatchExpression(StringData path,
     : LeafMatchExpression(GEO_NEAR, path), _rawObj(rawObj), _query(query) {}
 
 bool GeoNearMatchExpression::matchesSingleElement(const BSONElement& e,
-                                                  ArrayPositionalMatch* details) const {
+                                                  ArrayPositionalMatch* details,
+                                                  std::deque<std::string>* explain) const {
     return true;
 }
 

@@ -47,15 +47,24 @@ public:
 
     std::unique_ptr<MatchExpression> shallowClone() const final;
 
-    bool matchesArray(const BSONObj& array, ArrayPositionalMatch* details) const final {
+    bool matchesArray(const BSONObj& array,
+                      ArrayPositionalMatch* details,
+                      std::deque<std::string>* explain) const final {
         auto iter = BSONObjIterator(array);
-        for (int i = 0; iter.more() && i < _index; i++) {
+        int index = 0;
+        for (; iter.more() && index < _index; ++index) {
             iter.next();
         }
         while (iter.more()) {
             if (!_expression->matchesBSONElement(iter.next(), details)) {
+                if (explain) {
+                    explain->push_front(str::stream() << "element " << index << " of array '"
+                                                      << path()
+                                                      << "' does not satisfy subquery: ");
+                }
                 return false;
             }
+            ++index;
         }
         return true;
     }

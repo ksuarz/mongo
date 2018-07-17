@@ -49,7 +49,9 @@ public:
 
     std::unique_ptr<MatchExpression> shallowClone() const final;
 
-    bool matchesSingleElement(const BSONElement&, ArrayPositionalMatch*) const final;
+    bool matchesSingleElement(const BSONElement&,
+                              ArrayPositionalMatch*,
+                              std::deque<std::string>* explain) const final;
 
     void debugString(StringBuilder& debug, int level) const final;
 

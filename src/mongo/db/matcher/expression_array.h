@@ -58,10 +58,13 @@ public:
      *
      * 'anArray' must be the nested array at this expression's path.
      */
-    virtual bool matchesArray(const BSONObj& anArray, ArrayPositionalMatch* details) const = 0;
+    virtual bool matchesArray(const BSONObj& anArray,
+                              ArrayPositionalMatch* details,
+                              std::deque<std::string>* explain) const = 0;
 
     bool matchesSingleElement(const BSONElement&,
-                              ArrayPositionalMatch* details = nullptr) const final;
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final;
 
     bool equivalent(const MatchExpression* other) const override;
 
@@ -74,7 +77,9 @@ class ElemMatchObjectMatchExpression : public ArrayMatchingMatchExpression {
 public:
     ElemMatchObjectMatchExpression(StringData path, MatchExpression* sub);
 
-    bool matchesArray(const BSONObj& anArray, ArrayPositionalMatch* details) const;
+    bool matchesArray(const BSONObj& anArray,
+                      ArrayPositionalMatch* details,
+                      std::deque<std::string>* explain) const;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         std::unique_ptr<ElemMatchObjectMatchExpression> e =
@@ -127,7 +132,9 @@ public:
 
     void add(MatchExpression* sub);
 
-    bool matchesArray(const BSONObj& anArray, ArrayPositionalMatch* details) const;
+    bool matchesArray(const BSONObj& anArray,
+                      ArrayPositionalMatch* details,
+                      std::deque<std::string>* explain) const;
 
     virtual std::unique_ptr<MatchExpression> shallowClone() const {
         std::unique_ptr<ElemMatchValueMatchExpression> e =
@@ -190,7 +197,9 @@ public:
         return nullptr;
     }
 
-    virtual bool matchesArray(const BSONObj& anArray, ArrayPositionalMatch* details) const;
+    virtual bool matchesArray(const BSONObj& anArray,
+                              ArrayPositionalMatch* details,
+                              std::deque<std::string>* explain) const;
 
     virtual void debugString(StringBuilder& debug, int level) const;
 

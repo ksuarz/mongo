@@ -240,16 +240,25 @@ Status CollectionImpl::checkValidation(OperationContext* opCtx, const BSONObj& d
     if (documentValidationDisabled(opCtx))
         return Status::OK();
 
-    if (_validator->matchesBSON(document))
+    std::deque<std::string> explain;
+    if (_validator->matchesBSON(document, nullptr, &explain))
         return Status::OK();
+
+    StringBuilder builder;
+    for (auto&& str : explain) {
+        builder << std::move(str);
+    }
+    const auto reason = builder.str();
 
     if (_validationAction == ValidationAction::WARN) {
         warning() << "Document would fail validation"
-                  << " collection: " << ns() << " doc: " << redact(document);
+                  << " collection: " << ns() << " doc: " << redact(document)
+                  << " reason: " << reason;
         return Status::OK();
     }
 
-    return {ErrorCodes::DocumentValidationFailure, "Document failed validation"};
+    return {ErrorCodes::DocumentValidationFailure,
+            str::stream() << "Document failed validation: " << reason};
 }
 
 StatusWithMatchExpression CollectionImpl::parseValidator(

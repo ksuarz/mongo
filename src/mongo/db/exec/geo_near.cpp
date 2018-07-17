@@ -508,7 +508,9 @@ public:
         out->append("TwoDPtInAnnulusExpression", true);
     }
 
-    bool matchesSingleElement(const BSONElement& e, ArrayPositionalMatch* = nullptr) const final {
+    bool matchesSingleElement(const BSONElement& e,
+                              ArrayPositionalMatch* = nullptr,
+                              std::deque<std::string>* = nullptr) const final {
         if (!e.isABSONObj())
             return false;
 

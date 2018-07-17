@@ -42,7 +42,9 @@ class WhereNoOpMatchExpression final : public WhereMatchExpressionBase {
 public:
     explicit WhereNoOpMatchExpression(WhereParams params);
 
-    bool matches(const MatchableDocument* doc, ArrayPositionalMatch* details = nullptr) const final;
+    bool matches(const MatchableDocument* doc,
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* explain = nullptr) const final;
 
     std::unique_ptr<MatchExpression> shallowClone() const final;
 };

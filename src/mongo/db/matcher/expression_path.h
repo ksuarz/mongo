@@ -54,11 +54,12 @@ public:
     virtual ~PathMatchExpression() {}
 
     bool matches(const MatchableDocument* doc,
-                 ArrayPositionalMatch* details = nullptr) const final {
+                 ArrayPositionalMatch* details = nullptr,
+                 std::deque<std::string>* explain = nullptr) const final {
         MatchableDocument::IteratorHolder cursor(doc, &_elementPath);
         while (cursor->more()) {
             ElementIterator::Context e = cursor->next();
-            if (!matchesSingleElement(e.element(), details)) {
+            if (!matchesSingleElement(e.element(), details, explain)) {
                 continue;
             }
             if (details && details->arrayPositionRequested() && !e.arrayOffset().eoo()) {

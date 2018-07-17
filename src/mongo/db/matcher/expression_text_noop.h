@@ -42,7 +42,8 @@ public:
     }
 
     bool matchesSingleElement(const BSONElement& e,
-                              ArrayPositionalMatch* details = nullptr) const final {
+                              ArrayPositionalMatch* details = nullptr,
+                              std::deque<std::string>* explain = nullptr) const final {
         MONGO_UNREACHABLE;
     }
 
