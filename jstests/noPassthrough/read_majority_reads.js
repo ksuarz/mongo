@@ -28,8 +28,7 @@
     var testServer = MongoRunner.runMongod();
     var db = testServer.getDB("test");
     if (!db.serverStatus().storageEngine.supportsCommittedReads) {
-        print("Skipping read_majority_reads.js on storage engine that doesn't support " +
-              "committed reads.");
+        print("Skipping read_majority.js since storageEngine doesn't support it.");
         MongoRunner.stopMongod(testServer);
         return;
     }
@@ -62,8 +61,6 @@
             })));
         },
     };
-
-    const wMajority = {writeConcern: {w: "majority", wtimeout: ReplSetTest.kDefaultTimeoutMS}};
 
     // These test cases have a run method that will be passed a collection with a single object with
     // _id: 1 and a state field that equals either "before" or "after". The collection will also
@@ -152,23 +149,25 @@
     };
 
     function runTests(coll, mongodConnection) {
+        function makeSnapshot() {
+            return assert.commandWorked(mongodConnection.adminCommand("makeSnapshot")).name;
+        }
+        function setCommittedSnapshot(snapshot) {
+            assert.commandWorked(mongodConnection.adminCommand({"setCommittedSnapshot": snapshot}));
+        }
+
         assert.commandWorked(coll.createIndex({point: '2dsphere'}));
         for (var testName in cursorTestCases) {
             jsTestLog('Running ' + testName + ' against ' + coll.toString());
             var getCursor = cursorTestCases[testName];
 
-            // Set up initial state, which is guaranteed to be majority committed.
-            assert.commandWorked(mongodConnection.adminCommand(
-                {configureFailPoint: "disableAdvancingMajorityCommitPoint", mode: "off"}));
-            assert.commandWorked(coll.remove({}, wMajority));
-            assert.commandWorked(coll.insert({_id: 1, state: 'before', point: [0, 0]}, wMajority));
+            // Setup initial state.
+            assert.writeOK(coll.remove({}));
+            assert.writeOK(coll.save({_id: 1, state: 'before', point: [0, 0]}));
+            setCommittedSnapshot(makeSnapshot());
 
             // Check initial conditions.
             assert.eq(getCursor(coll).next().state, 'before');
-
-            // Prohibit further writes from entering the majority commit point.
-            assert.commandWorked(mongodConnection.adminCommand(
-                {configureFailPoint: "disableAdvancingMajorityCommitPoint", mode: "alwaysOn"}));
 
             // Change state without making it committed.
             assert.writeOK(coll.save({_id: 1, state: 'after', point: [0, 0]}));
