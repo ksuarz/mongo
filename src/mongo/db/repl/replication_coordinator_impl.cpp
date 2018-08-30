@@ -3147,12 +3147,21 @@ void ReplicationCoordinatorImpl::_setStableTimestampForStorage_inlock() {
     }
 }
 
+MONGO_FAIL_POINT_DEFINE(disableAdvancingMajorityCommitPoint);
+
 void ReplicationCoordinatorImpl::advanceCommitPoint(const OpTime& committedOpTime) {
     stdx::unique_lock<stdx::mutex> lk(_mutex);
     _advanceCommitPoint_inlock(committedOpTime);
 }
 
 void ReplicationCoordinatorImpl::_advanceCommitPoint_inlock(const OpTime& committedOpTime) {
+    log() << "XXX: ENTRY: advanceCommitPoint_inlock";
+    if (MONGO_FAIL_POINT(disableAdvancingMajorityCommitPoint)) {
+        log() << "XXX: not advancing majority commit point to " << committedOpTime;
+        return;
+    }
+    log() << "XXX: advancing commit point to " << committedOpTime.toString();
+
     if (_topCoord->advanceLastCommittedOpTime(committedOpTime)) {
         if (_getMemberState_inlock().arbiter()) {
             // Arbiters do not store replicated data, so we consider their data trivially
