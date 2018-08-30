@@ -20,6 +20,15 @@
     const pipeline = [{$out: {to: targetColl.getName(), mode: "replaceCollection"}}];
 
     //
+    // Test that $out fails if the mode is "replaceCollection" and the readConcern level is
+    // 'majority'.
+    //
+    assert.commandFailedWithCode(
+        targetColl.runCommand("aggregate",
+                              {pipeline: pipeline, cursor: {}, readConcern: {level: "majority"}}),
+        ErrorCodes.InvalidOptions);
+
+    //
     // Test $out with a non-existent output collection.
     //
     assert.commandWorked(coll.insert({_id: 0}));

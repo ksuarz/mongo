@@ -190,8 +190,10 @@ intrusive_ptr<DocumentSourceOut> DocumentSourceOut::create(
 
     auto readConcernLevel = repl::ReadConcernArgs::get(expCtx->opCtx).getLevel();
     uassert(ErrorCodes::InvalidOptions,
-            "$out cannot be used with a 'majority' read concern level",
-            readConcernLevel != repl::ReadConcernLevel::kMajorityReadConcern);
+            str::stream() << "$out with mode " << WriteMode_serializer(mode)
+                          << " cannot be used with a 'majority' read concern level",
+            !(mode == WriteModeEnum::kModeReplaceCollection &&
+              readConcernLevel == repl::ReadConcernLevel::kMajorityReadConcern));
 
     // Although we perform a check for "replaceCollection" mode with a sharded output collection
     // during lite parsing, we need to do it here as well in case mongos is stale or the command is
