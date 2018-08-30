@@ -68,6 +68,38 @@
     // them. The return value from the run method is expected to be the value of expectedBefore or
     // expectedAfter depending on the state of the state field.
     var nonCursorTestCases = {
+        aggregateOutInsertDocuments: {
+            run: function(coll) {
+                let outputColl = coll.getDB().output;
+                outputColl.drop();
+                assert.doesNotThrow(
+                    () => coll.aggregate(
+                        [{$out: {to: outputColl.getName(), mode: 'insertDocuments'}}],
+                        {readConcern: {level: 'majority'}}));
+
+                let outputDocuments = outputColl.find().toArray();
+                assert.eq(1, outputDocuments.length, () => tojson(outputDocuments));
+                return outputDocuments[0].state;
+            },
+            expectedBefore: 'before',
+            expectedAfter: 'after',
+        },
+        aggregateOutReplaceDocuments: {
+            run: function(coll) {
+                let outputColl = coll.getDB().output;
+                outputColl.drop();
+                assert.doesNotThrow(
+                    () => coll.aggregate(
+                        [{$out: {to: outputColl.getName(), mode: 'replaceDocuments'}}],
+                        {readConcern: {level: 'majority'}}));
+
+                let outputDocuments = outputColl.find().toArray();
+                assert.eq(1, outputDocuments.length, () => tojson(outputDocuments));
+                return outputDocuments[0].state;
+            },
+            expectedBefore: 'before',
+            expectedAfter: 'after',
+        },
         count_before: {
             run: function(coll) {
                 var res = coll.runCommand(
